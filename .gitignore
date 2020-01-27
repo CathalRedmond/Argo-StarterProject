@@ -21,6 +21,8 @@ mono_crash.*
 [Dd]ebugPublic/
 [Rr]elease/
 [Rr]eleases/
+[Ss]tatic/
+[Ss]tatic-Debug/
 x64/
 x86/
 [Aa][Rr][Mm]/
