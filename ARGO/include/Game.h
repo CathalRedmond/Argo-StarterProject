@@ -1,6 +1,7 @@
 #pragma once
-#include <SDL.h>
+#include "stdafx.h"
 #include <iostream>
+#include <SDL.h>
 
 /// <summary>
 /// Game class needed for the game

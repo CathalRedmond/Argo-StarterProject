@@ -10,14 +10,14 @@
 // add headers that you want to pre-compile here
 
 ////std
-//#include <random>
-//#include <iostream>
-//#include <vector>
+#include <random>
+#include <iostream>
+#include <vector>
 //
 ////SDL
-//#include <SDL.h>
-//#include <SDL_image.h>
-//#include <SDL_mixer.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_mixer.h>
 
 //some external libraries
 
