@@ -19,6 +19,10 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 
+////GLM
+#include <vec2.hpp>
+#include <vec3.hpp>
+
 //some external libraries
 
 
