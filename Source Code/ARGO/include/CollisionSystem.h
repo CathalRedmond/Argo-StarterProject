@@ -32,6 +32,7 @@ private:
 	void handlePlayerBulletCollision(Entity* t_playerBullet);
 	void handleGrenadeCollision(Entity* t_grenade);
 	void handleEnemyCollision(Entity* t_enemy);
+	void handleTileEnemyCollision(Entity* t_enemy);
 	void handleEnemyBulletCollision(Entity* t_enemyBullet);
 	void handleGlowStickCollision(Entity* t_glowStick);
 	void createExplosion(glm::vec2 t_position);

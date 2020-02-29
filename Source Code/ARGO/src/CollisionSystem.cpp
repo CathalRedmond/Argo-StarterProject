@@ -5,7 +5,7 @@ CollisionSystem::CollisionSystem(EventManager& t_eventManager) :
 	m_eventManager(t_eventManager),
 	m_quadTree(0, glm::vec2(0, 0), glm::vec2(Utilities::LEVEL_TILE_WIDTH* Utilities::TILE_SIZE, Utilities::LEVEL_TILE_HEIGHT* Utilities::TILE_SIZE))
 {
-	m_circleColliderBuffer.reserve(100);
+	m_circleColliderBuffer.reserve(200);
 }
 
 void CollisionSystem::update(Entity& t_entity)
@@ -48,6 +48,9 @@ void CollisionSystem::handleCollisions()
 			handlePlayerCollision(m_circleColliderBuffer[i]);
 			break;
 		case Tag::Enemy:
+			handleEnemyCollision(m_circleColliderBuffer[i]);
+			break;
+		case Tag::TileEnemy:
 			handleEnemyCollision(m_circleColliderBuffer[i]);
 			break;
 		case Tag::PlayerBullet:
@@ -189,6 +192,8 @@ void CollisionSystem::handlePlayerCollision(Entity* t_player)
 		case Tag::Tile:
 			playerToWall(t_player, other);
 			break;
+		case Tag::TileEnemy:
+			playerToWall(t_player, other);
 		case Tag::PickUp:
 			playerToPickUp(t_player, other);
 			break;
@@ -221,6 +226,9 @@ void CollisionSystem::handlePlayerBulletCollision(Entity* t_playerBullet)
 			playerBulletToEnemy(t_playerBullet, other);
 			break;
 		case Tag::Tile:
+			playerBulletToWall(t_playerBullet, other);
+			break;
+		case Tag::TileEnemy:
 			playerBulletToWall(t_playerBullet, other);
 			break;
 		default:
@@ -258,6 +266,39 @@ void CollisionSystem::handleGrenadeCollision(Entity* t_grenade)
 }
 
 void CollisionSystem::handleEnemyCollision(Entity* t_enemy)
+{
+	TransformComponent* rectPosition = static_cast<TransformComponent*>(t_enemy->getComponent(ComponentType::Transform));
+	int radius = static_cast<ColliderCircleComponent*>(t_enemy->getComponent(ComponentType::ColliderCircle))->getRadius();
+	glm::vec2 bounds{ radius, radius };
+	Quad quad{ NULL, rectPosition->getPos() - bounds, bounds * 2.0f };
+
+	std::vector<Entity*> entities;
+	m_quadTree.retrieve(&entities, quad);
+
+	for (auto& other : entities)
+	{
+		TagComponent* tag = static_cast<TagComponent*>(other->getComponent(ComponentType::Tag));
+
+		switch (tag->getTag())
+		{
+		case Tag::Enemy:
+		{
+			if (other != t_enemy)
+			{
+				enemyToEnemy(t_enemy, other);
+			}
+		}
+		break;
+		case Tag::Tile:
+			enemyToWall(t_enemy, other);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void CollisionSystem::handleTileEnemyCollision(Entity* t_enemy)
 {
 	TransformComponent* rectPosition = static_cast<TransformComponent*>(t_enemy->getComponent(ComponentType::Transform));
 	int radius = static_cast<ColliderCircleComponent*>(t_enemy->getComponent(ComponentType::ColliderCircle))->getRadius();
