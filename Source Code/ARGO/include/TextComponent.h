@@ -26,6 +26,7 @@ public:
 	//Set text
 	void setText(std::string t_text);
 
+
 	//set text size
 	void setSize(int t_size);
 

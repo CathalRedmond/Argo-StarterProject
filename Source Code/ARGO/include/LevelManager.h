@@ -28,7 +28,7 @@ struct LessThanByTotalDistance
 class LevelManager
 {
 public:
-	LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager, LightManager& t_lightManager);
+	LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager, LightManager& t_lightManager, EventManager& t_eventManager);
 	void setupLevel();
 	void update(BaseSystem* t_system);
 	void checkWallDamage();
@@ -46,7 +46,7 @@ private:
 	void generateFlowField();
 	void setNeighbourWeights(Entity* t_entity, std::vector<Entity*>& t_queue);
 	void setTileWeight(Entity* t_entity, Entity* t_closestNeighbour, std::vector<Entity*>& t_queue, int t_newWeight);
-	void generateLightField(); 
+	void generateLightField();
 	void setTileLight(Entity* t_entity, std::vector<Entity*>& t_queue, int t_newWeight);
 	void setNeighbourLights(Entity* t_entity, std::vector<Entity*>& t_queue);
 	void resetPathing();
@@ -58,6 +58,7 @@ private:
 	SDL_Renderer* m_renderer;
 	RenderSystem& m_renderSystem;
 	ProjectileManager& m_projectilemanager;
+	EventManager& m_eventManager;
 	LightManager& m_lightManager;
 	
 

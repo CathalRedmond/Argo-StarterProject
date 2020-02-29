@@ -163,11 +163,6 @@ void AiSystem::seek(TransformComponent* t_posComp, AiComponent* t_aiComponent, F
 
 void AiSystem::wallerSeek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination, HealthComponent* t_healthComponent)
 {
-#ifdef _DEBUG
-	std::cout << "Distance to destination: " << glm::distance2(t_destination + glm::vec2(Utilities::TILE_SIZE / 2.0f, Utilities::TILE_SIZE / 2.0f), t_posComp->getPos()) << std::endl;
-	std::cout << "Arrive distance: " << std::pow(Utilities::TILE_SIZE, 2) << std::endl;
-#endif // _DEBUG
-
 	if (glm::distance2(t_destination + glm::vec2(Utilities::TILE_SIZE / 2.0f, Utilities::TILE_SIZE / 2.0f), t_posComp->getPos()) < std::pow(Utilities::TILE_SIZE, 2))
 	{
 		Entity* tile = m_levelManager.findAtPosition(t_posComp->getPos());

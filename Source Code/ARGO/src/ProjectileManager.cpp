@@ -7,7 +7,8 @@ ProjectileManager::ProjectileManager(SDL_Renderer* t_renderer, EventManager& t_e
 	m_renderer(t_renderer),
 	m_focusPoint(t_focusPoint),
 	m_physicsSystem(t_physicsSystem),
-	m_collisionSystem(t_collisionSystem)
+	m_collisionSystem(t_collisionSystem),
+	m_eventManager(t_eventManager)
 {
 	//t_eventManager.subscribeToEvent<CreateBulletEvent>(std::bind(&ProjectileManager::createPlayerBullet, this, std::placeholders::_1));
 }

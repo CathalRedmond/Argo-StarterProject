@@ -96,6 +96,9 @@ void Rumble::setTime(RumbleLength t_lengthType)
 	case RumbleLength::Short:
 		m_time = SHORT_TIME;
 		break;
+	case RumbleLength::ExtraShort:
+		m_time = EXTRA_SHORT_TIME;
+		break;
 	default:
 		break;
 	}
@@ -123,6 +126,9 @@ void Rumble::setStrength(RumbleStrength t_strengthType)
 		break;
 	case RumbleStrength::Weak:
 		m_strength = WEAK_STRENGTH;
+		break;
+	case RumbleStrength::ExtraWeak:
+		m_strength = EXTRA_WEAK_STRENGTH;
 		break;
 	default:
 		break;

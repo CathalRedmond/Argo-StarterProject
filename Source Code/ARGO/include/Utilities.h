@@ -85,7 +85,7 @@ namespace Utilities
 	const int MAX_FLOW_FIELD_WEIGHT = 20;
 
 	const float RADIANS_TO_DEGREES = 57.2958;
-	static const int S_NUMBER_OF_SCREENS = 7; 
+	static const int S_NUMBER_OF_SCREENS = 8; 
 
 	static const glm::vec3 MENU_BUTTON_HIGHLIGHTED_COLOUR{ 255,255,240 };
 	static const glm::vec3 MENU_BUTTON_DEFAULT_COLOUR{ 199,163,10 };
@@ -142,7 +142,8 @@ enum class MenuStates
 	Help,
 	License,
 	Splash,
-	Achievements
+	Achievements,
+	Loading
 };
 
 enum class Systems
