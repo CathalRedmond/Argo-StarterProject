@@ -431,10 +431,11 @@ void GameScreen::updateGoal(float t_deltaTime)
 	updateGoalText();
 }
 
-void GameScreen::reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS])
+void GameScreen::reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS], ButtonCommandMap t_controllerButtonMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS] )
 {
 	m_gameOver = false;
 	m_currentLevel = 0;
+	setControllerButtonMap(t_controllerButtonMaps);
 	for (int index = 0; index < Utilities::S_MAX_PLAYERS; index++)
 	{
 		m_controllers[index] = t_controller[index];
