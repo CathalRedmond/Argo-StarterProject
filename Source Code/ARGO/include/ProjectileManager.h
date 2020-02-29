@@ -63,6 +63,8 @@ private:
 	PhysicsSystem& m_physicsSystem;
 	CollisionSystem& m_collisionSystem;
 
+	EventManager& m_eventManager;
+
 	SDL_Renderer* m_renderer;
 };
 

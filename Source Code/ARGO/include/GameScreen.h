@@ -46,7 +46,8 @@ public:
 	void render(SDL_Renderer* t_renderer);
 	void reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS], ButtonCommandMap t_controllerButtonMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS]);
 	void initialise(SDL_Renderer* t_renderer, ButtonCommandMap t_controllerButtonMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS], Controller t_controller[Utilities::S_MAX_PLAYERS], bool t_isOnline = false);
- private:
+ 
+private:
 
 	void createPlayer(Entity& t_player, int t_index, SDL_Renderer* t_renderer);
 	void createGoal();
@@ -67,7 +68,7 @@ public:
 	void updateLevelManager();
 	void setControllerButtonMap(ButtonCommandMap t_controllerMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS]);
 	void gameOver(const GameOver& t_event);
-
+	void updatePlayerColour(const UpdatePlayerColour& t_event);
 
 	Entity m_gameOverPopup;
 

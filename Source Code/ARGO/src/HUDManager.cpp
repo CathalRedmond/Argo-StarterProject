@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "HUDManager.h"
 
-HUDManager::HUDManager(Entity(&t_players)[Utilities::S_MAX_PLAYERS]):
-	m_players{t_players}
+HUDManager::HUDManager(Entity(&t_players)[Utilities::S_MAX_PLAYERS], EventManager& t_eventManager) :
+	m_players{ t_players },
+	m_eventManager{t_eventManager}
 {
 }
 /// <summary>
@@ -24,6 +25,7 @@ void HUDManager::init(SDL_Renderer* t_renderer)
 /// </summary>
 void HUDManager::update()
 {
+	int playerIndex = 0;
 	for (auto& hudElement : m_playerHUD) {
 		//Get the layout Data
 		HUDComponent* hudComp = static_cast<HUDComponent*>(hudElement.HUDLayoutData.getComponent(ComponentType::HUD));
@@ -43,7 +45,24 @@ void HUDManager::update()
 		{
 			ammoScaler = (float)ammo / (float)maxAmmo;
 		}
-		textComp->setText(std::to_string(ammo) + " / " + std::to_string(maxAmmo));
+		if (maxAmmo == 0 && ammo == 0)
+		{
+			hudElement.showInfAmmo = true;
+			textComp->setText("");
+		}
+		else
+		{
+			hudElement.showInfAmmo = false;
+			textComp->setText(std::to_string(ammo) + " / " + std::to_string(maxAmmo));
+		}
+		for (int index = 0; index < 4; index++)
+		{
+			hudElement.showAmmoType[index] = false;
+		}
+		hudElement.showAmmoType[static_cast<int>(weaponComp->getCurrent())] = true;
+
+
+		//This is a stand in until Emmett is done that.
 		hudComp->setCurrentAmmoSize(hudComp->getMaxAmmoSize().x * ammoScaler);
 		static_cast<PrimitiveComponent*>(hudElement.HUDAmmoBar.getComponent(ComponentType::Primitive))->setSize(hudComp->getCurrentAmmoSize());
 
@@ -80,22 +99,56 @@ void HUDManager::update()
 		//Convert the Max Health from a Const Int to a float.
 		float tempMaxHealth = hpComp->getMaxHealth();
 		//A percentage number between 1 and 0
-		float healthPercentage = (hpComp->getHealth()/ tempMaxHealth); 
+		float healthPercentage = (hpComp->getHealth() / tempMaxHealth);
 		//Scale it to the Value
 		float healthBarSizeX = hudComp->getMaxHealthSize().x * healthPercentage;
 		//Sets the Bar to the desired Size
 		hudComp->setCurrentHealthSize(healthBarSizeX);
 		PrimitiveComponent* primComp = static_cast<PrimitiveComponent*>(hudElement.HUDHealthBar.getComponent(ComponentType::Primitive));
+		ColourComponent* colorComp = static_cast<ColourComponent*>(hudElement.HUDHealthBar.getComponent(ComponentType::Colour));
 		//Applies the size change.
-		primComp->setSize(hudComp->getCurrentHealthSize());
+		if (hudElement.previousSize != hudComp->getCurrentHealthSize())
+		{
+			// lost health
+			if (hudElement.previousSize.x > hudComp->getCurrentHealthSize().x)
+			{
+				m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{255,0,0}, playerIndex });
+				colorComp->setColor(Colour{ 255,255,255,255 });
+			}
+			else if (hudElement.previousSize.x < hudComp->getCurrentHealthSize().x)
+			{
+				m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{0,255,0}, playerIndex });
+				colorComp->setColor(Colour{ 0,255,0,255 });
+			}
+			hudElement.timeSinceHealthChanged = SDL_GetTicks();
+		}
+		else
+		{
+			primComp->setSize(hudComp->getCurrentHealthSize());
+		}
+		if (SDL_GetTicks() - hudElement.timeSinceHealthChanged > 200)
+		{
+			m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{255,255,255}, playerIndex });
+			colorComp->setColor(Colour{ 255,0,0,255 });
+			hudElement.timeSinceHealthChanged = std::numeric_limits<float>::max();
+
+		}
+		hudElement.previousSize = hudComp->getCurrentHealthSize();
 
 		//Hud Texture
 		transformComp = static_cast<TransformComponent*>(hudElement.HUDVisualTexture.getComponent(ComponentType::Transform));
 		transformComp->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
 
+		static_cast<TransformComponent*>(hudElement.HUDAmmoBox[static_cast<int>(Weapon::GrenadeLauncher)].getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+		static_cast<TransformComponent*>(hudElement.HUDAmmoBox[static_cast<int>(Weapon::MachineGun)].getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+		static_cast<TransformComponent*>(hudElement.HUDAmmoBox[static_cast<int>(Weapon::Pistol)].getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+		static_cast<TransformComponent*>(hudElement.HUDAmmoBox[static_cast<int>(Weapon::Shotgun)].getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+		static_cast<TransformComponent*>(hudElement.HUDInfAmmo.getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+
 		//Avatar Texture
 		transformComp = static_cast<TransformComponent*>(hudElement.HUDAvatarIcon.getComponent(ComponentType::Transform));
 		transformComp->setPos(hudComp->getHUDPosition().x + hudComp->getAvatarOffset().x, hudComp->getHUDPosition().y + hudComp->getAvatarOffset().y);
+		playerIndex++;
 	}
 }
 /// <summary>
@@ -112,6 +165,17 @@ void HUDManager::render(SDL_Renderer* t_renderer, RenderSystem* t_system)
 		t_system->render(t_renderer, i.HUDVisualTexture);
 		t_system->render(t_renderer, i.HUDHealthText);
 		t_system->render(t_renderer, i.HUDAmmoText);
+		if (i.showInfAmmo)
+		{
+			t_system->render(t_renderer, i.HUDInfAmmo);
+		}
+		for (int index = 0; index < 4; index++)
+		{
+			if (i.showAmmoType[index])
+			{
+				t_system->render(t_renderer, i.HUDAmmoBox[index]);
+			}
+		}
 	}
 }
 
@@ -140,7 +204,23 @@ void HUDManager::setUpHUD(HUDBlock& t_hudBlock, int t_playerIndex)
 	primComp->setStaticPosition(true);
 
 	t_hudBlock.HUDVisualTexture.addComponent(new TransformComponent(true));
-	t_hudBlock.HUDVisualTexture.addComponent(new VisualComponent("HUD.png", m_renderer, glm::vec2(0,0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255),true));
+	t_hudBlock.HUDVisualTexture.addComponent(new VisualComponent("HUD.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::GrenadeLauncher)].addComponent(new TransformComponent(true));
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::GrenadeLauncher)].addComponent(new VisualComponent("smallGrenadeAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::MachineGun)].addComponent(new TransformComponent(true));
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::MachineGun)].addComponent(new VisualComponent("smallMachineGunAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::Pistol)].addComponent(new TransformComponent(true));
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::Pistol)].addComponent(new VisualComponent("smallAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::Shotgun)].addComponent(new TransformComponent(true));
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::Shotgun)].addComponent(new VisualComponent("smallShotgunAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDInfAmmo.addComponent(new TransformComponent(true));
+	t_hudBlock.HUDInfAmmo.addComponent(new VisualComponent("infAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
 
 	t_hudBlock.HUDHealthText.addComponent(new TransformComponent(true));
 	t_hudBlock.HUDHealthText.addComponent(new TextComponent(std::string("ariblk.ttf"), m_renderer, true, std::string("HI")));
