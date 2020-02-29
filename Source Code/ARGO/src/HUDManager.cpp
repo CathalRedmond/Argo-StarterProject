@@ -1,8 +1,8 @@
 #include "stdafx.h"
 #include "HUDManager.h"
 
-HUDManager::HUDManager(Entity(&t_players)[Utilities::S_MAX_PLAYERS]):
-	m_players{t_players}
+HUDManager::HUDManager(Entity(&t_players)[Utilities::S_MAX_PLAYERS]) :
+	m_players{ t_players }
 {
 }
 /// <summary>
@@ -97,14 +97,30 @@ void HUDManager::update()
 		//Convert the Max Health from a Const Int to a float.
 		float tempMaxHealth = hpComp->getMaxHealth();
 		//A percentage number between 1 and 0
-		float healthPercentage = (hpComp->getHealth()/ tempMaxHealth); 
+		float healthPercentage = (hpComp->getHealth() / tempMaxHealth);
 		//Scale it to the Value
 		float healthBarSizeX = hudComp->getMaxHealthSize().x * healthPercentage;
 		//Sets the Bar to the desired Size
 		hudComp->setCurrentHealthSize(healthBarSizeX);
 		PrimitiveComponent* primComp = static_cast<PrimitiveComponent*>(hudElement.HUDHealthBar.getComponent(ComponentType::Primitive));
+		ColourComponent* colorComp = static_cast<ColourComponent*>(hudElement.HUDHealthBar.getComponent(ComponentType::Colour));
 		//Applies the size change.
-		primComp->setSize(hudComp->getCurrentHealthSize());
+		if (hudElement.previousSize != hudComp->getCurrentHealthSize())
+		{
+			colorComp->setColor(Colour{ 255,255,255,255 });
+			hudElement.timeSinceDamageTaken = SDL_GetTicks();
+		}
+		else
+		{
+			primComp->setSize(hudComp->getCurrentHealthSize());
+		}
+		if (SDL_GetTicks() - hudElement.timeSinceDamageTaken > 200)
+		{
+			colorComp->setColor(Colour{ 255,0,0,255 });
+			hudElement.timeSinceDamageTaken = std::numeric_limits<float>::max();
+
+		}
+		hudElement.previousSize = hudComp->getCurrentHealthSize();
 
 		//Hud Texture
 		transformComp = static_cast<TransformComponent*>(hudElement.HUDVisualTexture.getComponent(ComponentType::Transform));
@@ -174,7 +190,7 @@ void HUDManager::setUpHUD(HUDBlock& t_hudBlock, int t_playerIndex)
 	primComp->setStaticPosition(true);
 
 	t_hudBlock.HUDVisualTexture.addComponent(new TransformComponent(true));
-	t_hudBlock.HUDVisualTexture.addComponent(new VisualComponent("HUD.png", m_renderer, glm::vec2(0,0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255),true));
+	t_hudBlock.HUDVisualTexture.addComponent(new VisualComponent("HUD.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
 
 	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::GrenadeLauncher)].addComponent(new TransformComponent(true));
 	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::GrenadeLauncher)].addComponent(new VisualComponent("smallGrenadeAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));

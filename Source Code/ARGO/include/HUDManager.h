@@ -25,6 +25,8 @@ struct HUDBlock
 	Entity HUDInfAmmo;
 	bool showInfAmmo = false;
 	bool showAmmoType[4]{ false,false,false,false };
+	glm::vec2 previousSize;
+	int timeSinceDamageTaken;
 };
 
 class HUDManager
@@ -42,6 +44,7 @@ private:
 
 	Entity(&m_players)[Utilities::S_MAX_PLAYERS];
 	SDL_Renderer* m_renderer;
+	const int DAMAGE_SHOW_TIME = 200;
 
 };
 
