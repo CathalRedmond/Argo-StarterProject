@@ -43,8 +43,24 @@ void HUDManager::update()
 		{
 			ammoScaler = (float)ammo / (float)maxAmmo;
 		}
+		if (maxAmmo == 0 && ammo == 0)
+		{
+			hudElement.showInfAmmo = true;
+			textComp->setText("");
+		}
+		else
+		{
+			hudElement.showInfAmmo = false;
+			textComp->setText(std::to_string(ammo) + " / " + std::to_string(maxAmmo));
+		}
+		for (int index = 0; index < 4; index++)
+		{
+			hudElement.showAmmoType[index] = false;
+		}
+		hudElement.showAmmoType[static_cast<int>(weaponComp->getCurrent())] = true;
+
+
 		//This is a stand in until Emmett is done that.
-		textComp->setText(std::to_string(ammo) + " / " + std::to_string(maxAmmo));
 		hudComp->setCurrentAmmoSize(hudComp->getMaxAmmoSize().x * ammoScaler);
 		static_cast<PrimitiveComponent*>(hudElement.HUDAmmoBar.getComponent(ComponentType::Primitive))->setSize(hudComp->getCurrentAmmoSize());
 
@@ -94,6 +110,12 @@ void HUDManager::update()
 		transformComp = static_cast<TransformComponent*>(hudElement.HUDVisualTexture.getComponent(ComponentType::Transform));
 		transformComp->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
 
+		static_cast<TransformComponent*>(hudElement.HUDAmmoBox[static_cast<int>(Weapon::GrenadeLauncher)].getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+		static_cast<TransformComponent*>(hudElement.HUDAmmoBox[static_cast<int>(Weapon::MachineGun)].getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+		static_cast<TransformComponent*>(hudElement.HUDAmmoBox[static_cast<int>(Weapon::Pistol)].getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+		static_cast<TransformComponent*>(hudElement.HUDAmmoBox[static_cast<int>(Weapon::Shotgun)].getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+		static_cast<TransformComponent*>(hudElement.HUDInfAmmo.getComponent(ComponentType::Transform))->setPos(hudComp->getHUDPosition().x, hudComp->getHUDPosition().y);
+
 		//Avatar Texture
 		transformComp = static_cast<TransformComponent*>(hudElement.HUDAvatarIcon.getComponent(ComponentType::Transform));
 		transformComp->setPos(hudComp->getHUDPosition().x + hudComp->getAvatarOffset().x, hudComp->getHUDPosition().y + hudComp->getAvatarOffset().y);
@@ -113,6 +135,17 @@ void HUDManager::render(SDL_Renderer* t_renderer, RenderSystem* t_system)
 		t_system->render(t_renderer, i.HUDVisualTexture);
 		t_system->render(t_renderer, i.HUDHealthText);
 		t_system->render(t_renderer, i.HUDAmmoText);
+		if (i.showInfAmmo)
+		{
+			t_system->render(t_renderer, i.HUDInfAmmo);
+		}
+		for (int index = 0; index < 4; index++)
+		{
+			if (i.showAmmoType[index])
+			{
+				t_system->render(t_renderer, i.HUDAmmoBox[index]);
+			}
+		}
 	}
 }
 
@@ -142,6 +175,22 @@ void HUDManager::setUpHUD(HUDBlock& t_hudBlock, int t_playerIndex)
 
 	t_hudBlock.HUDVisualTexture.addComponent(new TransformComponent(true));
 	t_hudBlock.HUDVisualTexture.addComponent(new VisualComponent("HUD.png", m_renderer, glm::vec2(0,0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255),true));
+
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::GrenadeLauncher)].addComponent(new TransformComponent(true));
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::GrenadeLauncher)].addComponent(new VisualComponent("smallGrenadeAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::MachineGun)].addComponent(new TransformComponent(true));
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::MachineGun)].addComponent(new VisualComponent("smallMachineGunAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::Pistol)].addComponent(new TransformComponent(true));
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::Pistol)].addComponent(new VisualComponent("smallAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::Shotgun)].addComponent(new TransformComponent(true));
+	t_hudBlock.HUDAmmoBox[static_cast<int>(Weapon::Shotgun)].addComponent(new VisualComponent("smallShotgunAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
+	t_hudBlock.HUDInfAmmo.addComponent(new TransformComponent(true));
+	t_hudBlock.HUDInfAmmo.addComponent(new VisualComponent("infAmmo.png", m_renderer, glm::vec2(0, 0), static_cast<Uint8>(255), static_cast<Uint8>(255), static_cast<Uint8>(255), true));
+
 
 	t_hudBlock.HUDHealthText.addComponent(new TransformComponent(true));
 	t_hudBlock.HUDHealthText.addComponent(new TextComponent(std::string("ariblk.ttf"), m_renderer, true, std::string("HI")));

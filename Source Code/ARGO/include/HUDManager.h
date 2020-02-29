@@ -12,15 +12,19 @@
 #include "TextComponent.h"
 #include "WeaponComponent.h"
 
-struct HUDBlock 
+struct HUDBlock
 {
 	Entity HUDVisualTexture;
 	Entity HUDHealthBar;
 	Entity HUDAmmoBar;
 	Entity HUDHealthText;
-	Entity HUDAmmoText;	
+	Entity HUDAmmoText;
 	Entity HUDAvatarIcon;
 	Entity HUDLayoutData;
+	Entity HUDAmmoBox[4];
+	Entity HUDInfAmmo;
+	bool showInfAmmo = false;
+	bool showAmmoType[4]{ false,false,false,false };
 };
 
 class HUDManager
@@ -35,6 +39,7 @@ public:
 	void reset();
 private:
 	HUDBlock m_playerHUD[Utilities::S_MAX_PLAYERS];
+
 	Entity(&m_players)[Utilities::S_MAX_PLAYERS];
 	SDL_Renderer* m_renderer;
 
