@@ -25,7 +25,7 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_renderSystem{ t_renderSystem },
 	m_hudManager(m_players),
 	m_particleManager(m_eventManager, m_particleSystem),
-	m_currentLevel(2),
+	m_currentLevel(0),
 	m_gameOver(false),
 	m_goalCurrentCharge(0),
 	m_goalIsCharging(false),
