@@ -32,7 +32,7 @@ void ParticleSystem::update(Entity& t_entity, float t_dt)
 					particleComp->setParticleColour(particleComp->getNextParticle(), randomColourBetweenTwoColours(colourComp));
 					particleComp->setParticleSize(particleComp->getNextParticle(), randomFloatBetweenTwoValue(primtiveComp));
 					particleComp->setParticleMovement(particleComp->getNextParticle(), randomDirectionVectorInRange(particleComp->getAngle(), particleComp->getAngleOffset(), particleComp->getSpeedOffset()));
-					particleComp->setParticle(particleComp->getEmitterPosition() + glm::vec2(randomOffset(particleComp->getOffset()), particleComp->getOffset()));
+					particleComp->setParticle(particleComp->getEmitterPosition() + glm::vec2(randomOffset(particleComp->getOffset()), randomOffset(particleComp->getOffset())));
 					particleComp->setPlaceParticleTimer(particleComp->getPlaceParticleTimer() - 1);
 				}
 			}
