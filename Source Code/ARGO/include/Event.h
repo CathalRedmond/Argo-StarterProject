@@ -67,7 +67,7 @@ struct UpdateAchievement
 {
 	int enemiesKilled = 0;
 	int gamesWon = 0;
-}; 
+};
 
 struct CloseWindow
 {
@@ -81,6 +81,14 @@ struct ChangeScreen
 struct GameOver
 {
 
+};
+
+struct LoadGame
+{
+};
+
+struct UpdateLoading
+{
 };
 
 class BaseEvent

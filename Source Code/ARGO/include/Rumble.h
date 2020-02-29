@@ -8,6 +8,7 @@ enum class RumbleStrength
 	Strong,
 	Medium,
 	Weak,
+	ExtraWeak,
 	// Default is for when a specific value is used
 	Default
 };
@@ -20,6 +21,7 @@ enum class RumbleLength
 	Long,
 	Medium,
 	Short,
+	ExtraShort,
 	//Default is for when a specific value is used
 	Default
 };
@@ -56,10 +58,12 @@ private:
 	const int LONG_TIME = 750;
 	const int MEDIUM_TIME = 500;
 	const int SHORT_TIME = 150;
+	const int EXTRA_SHORT_TIME = 50;
 
 	// const for the different values of RumbleStrength for the strength the rumble will be
 	const float STRONG_STRENGTH = 1.0f;
 	const float MEDIUM_STRENGTH = 0.5f;
 	const float WEAK_STRENGTH = 0.15f;
+	const float EXTRA_WEAK_STRENGTH = 0.05f;
 };
 

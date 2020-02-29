@@ -14,8 +14,9 @@ Game::Game() :
 	m_creditsScreen{ m_eventManager, m_commandSystem, m_inputSystem, m_renderSystem },
 	m_licenseScreen{ m_eventManager, m_commandSystem, m_inputSystem, m_renderSystem },
 	m_splashScreen{ m_eventManager, m_commandSystem, m_inputSystem, m_renderSystem },
-	m_mainMenuScreen{ m_eventManager, m_commandSystem, m_inputSystem, m_renderSystem },
-	m_achievementsScreen{ m_eventManager, m_commandSystem, m_inputSystem, m_renderSystem }, 
+	m_mainMenuScreen{ m_eventManager, m_controllers[0], m_commandSystem, m_inputSystem, m_renderSystem },
+	m_achievementsScreen{ m_eventManager, m_commandSystem, m_inputSystem, m_renderSystem },
+	m_loadingScreen{ m_renderSystem },
 #ifdef _DEBUG
 	m_currentScreen{ MenuStates::Splash }
 #else
@@ -63,15 +64,17 @@ Game::Game() :
 		m_audioMgr->PlayMusic("looping\\Ove - Earth Is All We Have.ogg");
 
 		m_achievementsScreen.initialise(m_renderer, m_controllers[0]);
+		m_loadingScreen.initialise(m_renderer);
 
 		initialiseScreen();
- 
+
 		m_eventManager.subscribeToEvent<CloseWindow>(std::bind(&Game::closeWindow, this, std::placeholders::_1));
 		m_eventManager.subscribeToEvent<ChangeScreen>(std::bind(&Game::changeScreen, this, std::placeholders::_1));
-
+		m_eventManager.subscribeToEvent<LoadGame>(std::bind(&Game::loadGame, this, std::placeholders::_1));
+		m_eventManager.subscribeToEvent<UpdateLoading>(std::bind(&Game::updateLoading, this, std::placeholders::_1));
 		setupIgnoredEvents();
 
- 
+
 
 		// Game is running
 		m_isRunning = true;
@@ -224,7 +227,7 @@ void Game::processEvent()
 }
 
 void Game::update(float t_dt)
-{ 
+{
 	switch (m_currentScreen)
 	{
 	case MenuStates::Game:
@@ -247,7 +250,7 @@ void Game::update(float t_dt)
 		break;
 	case MenuStates::Achievements:
 		m_achievementsScreen.update(t_dt);
-		break; 
+		break;
 	default:
 		break;
 	}
@@ -278,10 +281,10 @@ void Game::render()
 		break;
 	case MenuStates::Achievements:
 		m_achievementsScreen.render(m_renderer);
-		break; 
+		break;
 	default:
 		break;
-	} 
+	}
 	SDL_RenderPresent(m_renderer);
 }
 
@@ -341,26 +344,48 @@ void Game::createButtonMaps()
 void Game::changeScreen(const ChangeScreen& t_event)
 {
 	m_currentScreen = t_event.newScreen;
-	if (m_hasScreenBeenSet[static_cast<int>(m_currentScreen)])
+	if (m_currentScreen != MenuStates::Game)
 	{
-		resetScreen();
+		if (m_hasScreenBeenSet[static_cast<int>(m_currentScreen)])
+		{
+			resetScreen();
+		}
+		else
+		{
+			initialiseScreen();
+		}
+	}
+}
+
+void Game::loadGame(const LoadGame& t_event)
+{
+	if (m_hasScreenBeenSet[static_cast<int>(MenuStates::Game)])
+	{
+		m_gameScreen.reset(m_renderer, m_controllers);
 	}
 	else
 	{
-		initialiseScreen();
+		m_gameScreen.initialise(m_renderer, m_controllerButtonMaps, m_controllers);
+		m_hasScreenBeenSet[static_cast<int>(MenuStates::Game)] = true;
 	}
-} 
+	m_eventManager.emitEvent(ChangeScreen{ MenuStates::Game });
+}
+
+void Game::updateLoading(const UpdateLoading& t_event)
+{
+	m_loadingScreen.update(0);
+	SDL_RenderClear(m_renderer);
+	m_loadingScreen.render(m_renderer);
+	SDL_RenderPresent(m_renderer);
+}
 
 void Game::initialiseScreen()
 {
 	createButtonMaps();
 	switch (m_currentScreen)
 	{
-	case MenuStates::Game:
-		m_gameScreen.initialise(m_renderer, m_controllerButtonMaps, m_controllers);
-		break;
 	case MenuStates::MainMenu:
-		m_mainMenuScreen.initialise(m_renderer, m_controllers[0]);
+		m_mainMenuScreen.initialise(m_renderer);
 		break;
 	case MenuStates::Credits:
 		m_creditsScreen.initialise(m_renderer, m_controllers[0]);
@@ -373,7 +398,7 @@ void Game::initialiseScreen()
 		break;
 	case MenuStates::Splash:
 		m_splashScreen.initialise(m_renderer, m_controllers[0]);
-		break; 
+		break;
 	default:
 		break;
 	}
@@ -385,9 +410,6 @@ void Game::resetScreen()
 	createButtonMaps();
 	switch (m_currentScreen)
 	{
-	case MenuStates::Game:
-		m_gameScreen.reset(m_renderer, m_controllers);
-		break;
 	case MenuStates::MainMenu:
 		m_mainMenuScreen.reset();
 		break;
@@ -405,7 +427,7 @@ void Game::resetScreen()
 		break;
 	case MenuStates::Achievements:
 		m_achievementsScreen.reset();
-		break; 
+		break;
 	default:
 		break;
 	}

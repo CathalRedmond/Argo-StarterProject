@@ -10,7 +10,7 @@ bool cleanUpEnemies(const Entity& t_entity)
 GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, Controller t_controllers[Utilities::S_MAX_PLAYERS], CommandSystem& t_commandSystem, InputSystem& t_input, RenderSystem& t_renderSystem) :
 	m_eventManager{ t_eventManager },
 	m_controllers{ *t_controllers },
-	m_levelManager{ t_renderer, m_players, m_renderSystem, m_projectileManager },
+	m_levelManager{ t_renderer, m_players, m_renderSystem, m_projectileManager, t_eventManager },
 	m_enemyManager{ t_renderer, Utilities::ENEMY_INITIAL_SPAWN_DELAY, t_eventManager, m_transformSystem, m_collisionSystem, m_healthSystem, m_aiSystem, m_renderSystem, m_levelManager },
 	m_renderer{ t_renderer },
 	m_transformSystem{ m_eventManager },
@@ -67,7 +67,7 @@ void GameScreen::processEvents(SDL_Event* t_event)
 			break;
 		}
 		case SDLK_RETURN:
-		{ 
+		{
 			for (Entity& p : m_players)
 			{
 				(static_cast<HealthComponent*>(p.getComponent(ComponentType::Health))->setHealth(0));
@@ -76,7 +76,7 @@ void GameScreen::processEvents(SDL_Event* t_event)
 			break;
 		}
 		case SDLK_1:
-		{ 
+		{
 			m_eventManager.emitEvent<GameOver>(GameOver{ });
 			break;
 		}
@@ -244,7 +244,7 @@ void GameScreen::gameOver(const GameOver& t_event)
 		{
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Pressed)][index] =
 			{
- 				ButtonCommandPair(ButtonType::B, new GoToMainMenuCommand())
+				ButtonCommandPair(ButtonType::B, new GoToMainMenuCommand())
 			};
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Held)][index] = ButtonCommandMap();
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Released)][index] = ButtonCommandMap();
