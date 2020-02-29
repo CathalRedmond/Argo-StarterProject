@@ -93,6 +93,10 @@ namespace Utilities
 	const float PERCENTAGE_BUFFER_BETWEEN_HUDS = 0.05f;//5% screen space.
 	const float PERCENTAGE_SCREENSPACE_OF_HUD = 0.1875f;//18.75% screen space which is taken by each HUD.
 
+	//Light Manager
+	const int LIGHT_MAX_POOL = 20;
+	const int LIGHT_EXPLOSION_LIFETIME = 30;
+
 	//Particles Manager
 	//Base Particles
 	//1-100 value

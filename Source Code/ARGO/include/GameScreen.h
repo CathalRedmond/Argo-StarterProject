@@ -18,6 +18,7 @@
 #include "HUDManager.h"
 #include "ParticleManager.h"
 #include "BloodManager.h"
+#include "LightManager.h"
 #include <WeaponSystem.h>
 
 
@@ -77,6 +78,7 @@ public:
 	EnemyManager m_enemyManager;
 	HUDManager m_hudManager;
 	BloodManager m_bloodManager;
+	LightManager m_lightManager;
  
 	PlayerFactory m_playerFactory;
 	PickUpManager m_pickUpManager;
