@@ -16,6 +16,7 @@
     <ClCompile Include="src\AnalogRotateCommand.cpp" />
     <ClCompile Include="src\AssetManager.cpp" />
     <ClCompile Include="src\AudioManager.cpp" />
+    <ClCompile Include="src\BloodManager.cpp" />
     <ClCompile Include="src\CloseWindowCommand.cpp" />
     <ClCompile Include="src\Command.cpp" />
     <ClCompile Include="src\EnemyFactory.cpp" />
@@ -109,6 +110,7 @@
     <ClInclude Include="include\AssetManager.h" />
     <ClInclude Include="include\AudioManager.h" />
     <ClInclude Include="include\BehaviourTree.h" />
+    <ClInclude Include="include\BloodManager.h" />
     <ClInclude Include="include\CloseWindowCommand.h" />
     <ClInclude Include="include\Command.h" />
     <ClInclude Include="include\EnemyFactory.h" />

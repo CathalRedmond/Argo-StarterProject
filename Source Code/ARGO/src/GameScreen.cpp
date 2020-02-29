@@ -24,7 +24,8 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_inputSystem{ t_input },
 	m_renderSystem{ t_renderSystem },
 	m_hudManager(m_players),
-	m_particleManager(m_eventManager, m_particleSystem)
+	m_particleManager(m_eventManager, m_particleSystem),
+	m_bloodManager(m_particleSystem, m_players)
 {
 }
 
@@ -45,6 +46,7 @@ void GameScreen::update(float t_deltaTime)
 		m_pickUpManager.update(t_deltaTime);
 		m_hudManager.update();
 		m_particleManager.update(t_deltaTime);
+		m_bloodManager.update(t_deltaTime);
 	}
 }
 
@@ -95,6 +97,7 @@ void GameScreen::render(SDL_Renderer* t_renderer)
 	preRender();
 	m_levelManager.render(t_renderer, &m_renderSystem);
 	m_enemyManager.render(t_renderer);
+	m_bloodManager.render(t_renderer, &m_renderSystem);
 	for (Entity& player : m_players)
 	{
 		if (static_cast<HealthComponent*>(player.getComponent(ComponentType::Health))->isAlive())
