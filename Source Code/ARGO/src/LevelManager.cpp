@@ -32,8 +32,20 @@ void LevelManager::setupLevel()
 		{
 			m_levelTiles.emplace_back();
 			m_levelTiles.back().addComponent(new TransformComponent(glm::vec2(j * Utilities::TILE_SIZE, i * Utilities::TILE_SIZE)));
+			TransformComponent* transformComp = static_cast<TransformComponent*>(m_levelTiles.back().getComponent(ComponentType::Transform));
+			int rotationScalar = glm::linearRand(0, 3);
+			transformComp->setRotation(0 + (90 * rotationScalar));
 			m_levelTiles.back().addComponent(new TagComponent(Tag::Tile));
-			m_levelTiles.back().addComponent(new VisualComponent("wallSmall.png", m_renderer));
+			int defaultWallChance = glm::linearRand(1, 5);
+			if (defaultWallChance != 4 && defaultWallChance !=5 )
+			{
+				m_levelTiles.back().addComponent(new VisualComponent("wallSmall1.png", m_renderer));
+			}
+			else
+			{
+				int wallIndex = glm::linearRand(2, 5);
+				m_levelTiles.back().addComponent(new VisualComponent("wallSmall" + std::to_string(wallIndex) + ".png", m_renderer));
+			}
 			m_levelTiles.back().addComponent(new ColliderAABBComponent(glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE)));
 			m_levelTiles.back().addComponent(new TileComponent());
 			m_levelTiles.back().addComponent(new HealthComponent(Utilities::WALL_HEALTH, Utilities::WALL_HEALTH));

@@ -109,19 +109,28 @@ void HUDManager::update()
 		//Applies the size change.
 		if (hudElement.previousSize != hudComp->getCurrentHealthSize())
 		{
-			m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{255,0,0}, playerIndex });
-			colorComp->setColor(Colour{ 255,255,255,255 });
-			hudElement.timeSinceDamageTaken = SDL_GetTicks();
+			// lost health
+			if (hudElement.previousSize.x > hudComp->getCurrentHealthSize().x)
+			{
+				m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{255,0,0}, playerIndex });
+				colorComp->setColor(Colour{ 255,255,255,255 });
+			}
+			else if (hudElement.previousSize.x < hudComp->getCurrentHealthSize().x)
+			{
+				m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{0,255,0}, playerIndex });
+				colorComp->setColor(Colour{ 0,255,0,255 });
+			}
+			hudElement.timeSinceHealthChanged = SDL_GetTicks();
 		}
 		else
 		{
 			primComp->setSize(hudComp->getCurrentHealthSize());
 		}
-		if (SDL_GetTicks() - hudElement.timeSinceDamageTaken > 200)
+		if (SDL_GetTicks() - hudElement.timeSinceHealthChanged > 200)
 		{
 			m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{255,255,255}, playerIndex });
 			colorComp->setColor(Colour{ 255,0,0,255 });
-			hudElement.timeSinceDamageTaken = std::numeric_limits<float>::max();
+			hudElement.timeSinceHealthChanged = std::numeric_limits<float>::max();
 
 		}
 		hudElement.previousSize = hudComp->getCurrentHealthSize();

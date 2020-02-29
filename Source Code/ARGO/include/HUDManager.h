@@ -26,7 +26,7 @@ struct HUDBlock
 	bool showInfAmmo = false;
 	bool showAmmoType[4]{ false,false,false,false };
 	glm::vec2 previousSize;
-	int timeSinceDamageTaken;
+	int timeSinceHealthChanged;
 };
 
 class HUDManager
