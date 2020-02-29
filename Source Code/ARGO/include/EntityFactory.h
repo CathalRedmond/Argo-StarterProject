@@ -8,6 +8,7 @@
 #include "HealthComponent.h"
 #include "ForceComponent.h"
 #include "ColliderCircleComponent.h"
+#include "ColliderAABBComponent.h"
 #include "ParticleEmitterComponent.h"
 #include "FactoryStatSheet.h"
 #include "TagComponent.h"

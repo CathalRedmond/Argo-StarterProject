@@ -5,7 +5,7 @@ CollisionSystem::CollisionSystem(EventManager& t_eventManager) :
 	m_eventManager(t_eventManager),
 	m_quadTree(0, glm::vec2(0, 0), glm::vec2(Utilities::LEVEL_TILE_WIDTH* Utilities::TILE_SIZE, Utilities::LEVEL_TILE_HEIGHT* Utilities::TILE_SIZE))
 {
-	m_circleColliderBuffer.reserve(100);
+	m_circleColliderBuffer.reserve(200);
 }
 
 void CollisionSystem::update(Entity& t_entity)
@@ -49,6 +49,9 @@ void CollisionSystem::handleCollisions()
 			break;
 		case Tag::Enemy:
 			handleEnemyCollision(m_circleColliderBuffer[i]);
+			break;
+		case Tag::WallerEnemy:
+			handleWallerEnemyCollision(m_circleColliderBuffer[i]);
 			break;
 		case Tag::PlayerBullet:
 			handlePlayerBulletCollision(m_circleColliderBuffer[i]);
@@ -189,6 +192,9 @@ void CollisionSystem::handlePlayerCollision(Entity* t_player)
 		case Tag::Tile:
 			playerToWall(t_player, other);
 			break;
+		case Tag::WallerEnemy:
+			playerToWaller(t_player, other);
+			break;
 		case Tag::PickUp:
 			playerToPickUp(t_player, other);
 			break;
@@ -222,6 +228,9 @@ void CollisionSystem::handlePlayerBulletCollision(Entity* t_playerBullet)
 			break;
 		case Tag::Tile:
 			playerBulletToWall(t_playerBullet, other);
+			break;
+		case Tag::WallerEnemy:
+			playerBulletToEnemy(t_playerBullet, other);
 			break;
 		default:
 			break;
@@ -284,6 +293,40 @@ void CollisionSystem::handleEnemyCollision(Entity* t_enemy)
 		case Tag::Tile:
 			enemyToWall(t_enemy, other);
 			break;
+		default:
+			break;
+		}
+	}
+}
+
+void CollisionSystem::handleWallerEnemyCollision(Entity* t_enemy)
+{
+	TransformComponent* rectPosition = static_cast<TransformComponent*>(t_enemy->getComponent(ComponentType::Transform));
+	int radius = static_cast<ColliderCircleComponent*>(t_enemy->getComponent(ComponentType::ColliderCircle))->getRadius();
+	glm::vec2 bounds{ radius, radius };
+	Quad quad{ NULL, rectPosition->getPos() - bounds, bounds * 2.0f };
+
+	std::vector<Entity*> entities;
+	m_quadTree.retrieve(&entities, quad);
+
+	for (auto& other : entities)
+	{
+		TagComponent* tag = static_cast<TagComponent*>(other->getComponent(ComponentType::Tag));
+
+		switch (tag->getTag())
+		{
+		case Tag::Enemy:
+		{
+			if (other != t_enemy)
+			{
+				enemyToEnemy(t_enemy, other);
+			}
+		}
+		break;
+		//he be giving 0 fucks about the walls
+		//case Tag::Tile:
+		//	enemyToWall(t_enemy, other);
+		//	break;
 		default:
 			break;
 		}
@@ -473,6 +516,36 @@ void CollisionSystem::playerToWall(Entity* t_player, Entity* t_wall)
 	}
 }
 
+void CollisionSystem::playerToWaller(Entity* t_player, Entity* t_waller)
+{
+	if (t_waller->getComponent(ComponentType::ColliderCircle) && circleToCircleCollision(t_player, t_waller))
+	{
+		int playerRadius = static_cast<ColliderCircleComponent*>(t_player->getComponent(ComponentType::ColliderCircle))->getRadius();
+		TransformComponent* playerPosition = static_cast<TransformComponent*>(t_player->getComponent(ComponentType::Transform));
+		ForceComponent* playerForce = static_cast<ForceComponent*>(t_player->getComponent(ComponentType::Force));
+		HealthComponent* playerHealth = static_cast<HealthComponent*>(t_player->getComponent(ComponentType::Health));
+		InputComponent* playerInput = static_cast<InputComponent*>(t_player->getComponent(ComponentType::Input));
+	
+		if (playerInput)
+		{
+			playerInput->getController().activateRumble(RumbleStrength::Strong, RumbleLength::Short);
+		}
+
+		int enemyRadius = static_cast<ColliderCircleComponent*>(t_waller->getComponent(ComponentType::ColliderCircle))->getRadius();
+		TransformComponent* enemyPosition = static_cast<TransformComponent*>(t_waller->getComponent(ComponentType::Transform));
+		ForceComponent* enemyForce = static_cast<ForceComponent*>(t_waller->getComponent(ComponentType::Force));
+
+		glm::vec2 distanceBetween = glm::normalize(playerPosition->getPos() - enemyPosition->getPos()) * PLAYER_TO_ENEMY_REFECTION_SCALER;
+
+		//if took damage and is alive
+		if (playerHealth->isAlive())
+		{
+			playerForce->addForce(distanceBetween);
+			enemyForce->addForce(-distanceBetween);
+		}
+	}
+}
+
 void CollisionSystem::playerToPickUp(Entity* t_player, Entity* t_pickUp)
 {
 	if (t_pickUp->getComponent(ComponentType::ColliderCircle) && circleToCircleCollision(t_player, t_pickUp))
@@ -507,10 +580,8 @@ void CollisionSystem::playerToPickUp(Entity* t_player, Entity* t_pickUp)
 				break;
 			}
 
-
 		}
 	}
-
 }
 
 void CollisionSystem::playerToGoal(Entity* t_player, Entity* t_goal)
@@ -525,6 +596,9 @@ void CollisionSystem::playerBulletToEnemy(Entity* t_playerBullet, Entity* t_enem
 {
 	if (t_enemy->getComponent(ComponentType::ColliderCircle) && circleToCircleCollision(t_playerBullet, t_enemy))
 	{
+#ifdef _DEBUG
+		std::cout << "Waller shot!" << std::endl;
+#endif // _DEBUG
 		static_cast<HealthComponent*>(t_playerBullet->getComponent(ComponentType::Health))->setHealth(0); //kill the bullet
 		static_cast<HealthComponent*>(t_enemy->getComponent(ComponentType::Health))->reduceHealth(1);
 		if (!static_cast<HealthComponent*>(t_enemy->getComponent(ComponentType::Health))->isAlive())

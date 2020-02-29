@@ -14,7 +14,7 @@ void InputSystem::update(Entity& t_entity)
 {
 
 #ifdef INPUT_SYS_DEBUG
-	//std::cout << "Calling InputComponent.update()" << std::endl;
+	std::cout << "Calling InputComponent.update()" << std::endl;
 #endif
 
 	InputComponent* inputComp = static_cast<InputComponent*>(t_entity.getComponent(ComponentType::Input));

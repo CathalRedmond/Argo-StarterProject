@@ -19,6 +19,8 @@ public:
 	float getMaxSpeed();
 	bool getIsleader();
 	void setIsLeaser(bool t_value);
+	void setSeekPos(glm::vec2 t_position);
+	glm::vec2& getSeekPos();
 
 private:
 	AITypes m_type = AITypes::eMelee;
@@ -26,5 +28,6 @@ private:
 	float m_maxRotation = 2.0f; //3 degrees either side shift per frame. Used In AI
 	float m_maxSpeed = 5.0f;//max speed Per Frame. Used By AI.
 	bool m_isLeader;
+	glm::vec2 m_seekPosition;
 };
 

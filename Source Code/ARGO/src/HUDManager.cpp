@@ -48,7 +48,7 @@ void HUDManager::update()
 		if (maxAmmo == 0 && ammo == 0)
 		{
 			hudElement.showInfAmmo = true;
-			textComp->setText("");
+			textComp->setText(" ");
 		}
 		else
 		{

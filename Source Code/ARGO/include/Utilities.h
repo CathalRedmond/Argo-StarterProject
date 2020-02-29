@@ -29,6 +29,9 @@ namespace Utilities
 	const std::string FONTS_PATH = "assets\\fonts\\";
 	const std::string FILES_PATH = "assets\\files\\";
 
+	const std::string WALL_SPRITE = "wallSmall.png";
+	const std::string FLOOR_SPRITE = "floor_1b.png";
+
 
 #ifdef _DEBUG
 	const int SCREEN_WIDTH = 1600;
@@ -54,6 +57,7 @@ namespace Utilities
 	const int ENEMY_RADIUS = 24;
 	const int ENEMY_HP = 2;
 	const int ENEMY_POOL_SIZE = 100;
+	const int WALLERS_POOL_SIZE = 50;
 	const float ENEMY_INITIAL_SPAWN_DELAY = 300;
 
 	const glm::vec2 GOAL_START_POSITION = glm::vec2(51, 36) * (float)TILE_SIZE;

@@ -19,7 +19,9 @@ public:
 	void update(float t_dt);
 	void render(SDL_Renderer* t_renderer);
 	void spawnGroup(float t_dt);
+	void spawnWaller(float t_dt);
 	void createEnemyAtTile(Entity* t_tile);
+	void createWallerAtTile(Entity* t_tile);
 	Entity(&getEnemies())[Utilities::ENEMY_POOL_SIZE];
 	void killAll();
 	void setDifficulty(int t_value);
@@ -27,8 +29,11 @@ public:
 private:
 	static const int ENEMY_BASIC_RADIUS = 24;
 	Entity m_enemies[Utilities::ENEMY_POOL_SIZE];
+	Entity m_wallers[Utilities::WALLERS_POOL_SIZE];
 	int m_nextEnemy;
+	int m_nextWaller;
 	float m_spawnEnemyTimer;
+	float m_spawnWallerTimer;
 	int m_difficultyLevel;
 	float m_difficultyTimer;
 	const float DIFFICULTY_INCREASE_RATE = 900;

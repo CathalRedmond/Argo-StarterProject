@@ -23,11 +23,11 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_commandSystem{ t_commandSystem },
 	m_inputSystem{ t_input },
 	m_renderSystem{ t_renderSystem },
-	m_hudManager(m_players,m_eventManager),
+	m_hudManager(m_players, m_eventManager),
 	m_particleManager(m_eventManager, m_particleSystem),
 	m_bloodManager(m_particleSystem, m_players),
 	m_lightManager(m_eventManager),
-	m_currentLevel(0),
+	m_currentLevel(2),
 	m_gameOver(false),
 	m_goalCurrentCharge(0),
 	m_goalIsCharging(false),
@@ -74,14 +74,10 @@ void GameScreen::processEvents(SDL_Event* t_event)
 	{
 		switch (t_event->key.keysym.sym)
 		{
+#ifdef _DEBUG
 		case SDLK_HOME:
 		{
 			m_eventManager.emitEvent<ChangeScreen>(ChangeScreen{ MenuStates::MainMenu });
-			break;
-		}
-		case SDLK_DELETE:
-		{
-			m_players[0].removeCompType(ComponentType::Input);
 			break;
 		}
 		case SDLK_RETURN:
@@ -98,6 +94,8 @@ void GameScreen::processEvents(SDL_Event* t_event)
 			m_eventManager.emitEvent<GameOver>(GameOver{ false});
 			break;
 		}
+#endif // _DEBUG
+
 		default:
 			break;
 		}
@@ -127,6 +125,7 @@ void GameScreen::render(SDL_Renderer* t_renderer)
 	m_particleManager.render(t_renderer, &m_renderSystem);
 	m_levelManager.renderLight(t_renderer, &m_renderSystem);
 	m_hudManager.render(t_renderer, &m_renderSystem);
+
 	if (m_gameOver)
 	{
 		if (m_isGameLost)
@@ -138,7 +137,6 @@ void GameScreen::render(SDL_Renderer* t_renderer)
 			m_renderSystem.render(t_renderer, m_gameWinPopup);
 		}
 	}
-
 }
 
 void GameScreen::createPlayer(Entity& t_player, int t_index, SDL_Renderer* t_renderer)
@@ -157,7 +155,7 @@ void GameScreen::createGoal()
 	m_goal.addComponent(new ColliderCircleComponent(32));
 	m_goal.addComponent(new TagComponent(Tag::Goal));
 	m_goal.addComponent(new VisualComponent("EscapePod.png", m_renderer));
-	m_goal.addComponent(new TextComponent("ordinary.ttf", m_renderer, 24, false, ""));
+	m_goal.addComponent(new TextComponent("ordinary.ttf", m_renderer, 24, false, " "));
 }
 
 void GameScreen::createPopups(SDL_Renderer* t_renderer)
@@ -173,7 +171,6 @@ void GameScreen::createPopups(SDL_Renderer* t_renderer)
 	visualComp->setStaticPosition(true);
 	m_gameWinPopup.addComponent(new TransformComponent(glm::vec2(Utilities::SCREEN_WIDTH / 2.0f - visualComp->getWidth() / 2.0f, Utilities::SCREEN_HEIGHT / 2.0f - visualComp->getHeight() / 2.0f)));
 	static_cast<TransformComponent*>(m_gameWinPopup.getComponent(ComponentType::Transform))->setAlwaysOnScreen(true);
-
 }
 
 void GameScreen::setUpLevel()
@@ -426,7 +423,6 @@ void GameScreen::cycleWeapons(const WeaponCycle& t_event)
 	static_cast<WeaponComponent*>(t_event.player.getComponent(ComponentType::Weapon))->cycleCurrentWeapon(t_event.isCycleUp);
 }
 
-
 void GameScreen::preRender()
 {
 	// Setting the focus point for the camera.
@@ -464,7 +460,7 @@ void GameScreen::updateGoal(float t_deltaTime)
 	updateGoalText();
 }
 
-void GameScreen::reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS], ButtonCommandMap t_controllerButtonMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS] )
+void GameScreen::reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS], ButtonCommandMap t_controllerButtonMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS])
 {
 	m_gameOver = false;
 	m_currentLevel = 0;
@@ -510,7 +506,7 @@ void GameScreen::initialise(SDL_Renderer* t_renderer, ButtonCommandMap t_control
 	m_projectileManager.init();
 	m_pickUpManager.init(m_renderer);
 	m_hudManager.init(t_renderer);
-	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));	
+	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));
 	m_eventManager.subscribeToEvent<UpdatePlayerColour>(std::bind(&GameScreen::updatePlayerColour, this, std::placeholders::_1));
 	m_eventManager.subscribeToEvent<WeaponCycle>(std::bind(&GameScreen::cycleWeapons, this, std::placeholders::_1));
 

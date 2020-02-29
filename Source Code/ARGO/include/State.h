@@ -20,15 +20,24 @@ public:
 
 	virtual void idle(FiniteStateMachine* a)
 	{
+#ifdef _DEBUG
 		std::cout << "no transition to idle" << std::endl;
+
+#endif // _DEBUG
 	}
 	virtual void moving(FiniteStateMachine* a)
 	{
+#ifdef _DEBUG
 		std::cout << "no transition to moving" << std::endl;
+
+#endif // _DEBUG
 	}
 	virtual void attacking(FiniteStateMachine* a)
 	{
+#ifdef _DEBUG
 		std::cout << "no transition to attacking" << std::endl;
+
+#endif // _DEBUG
 	}
 
 };

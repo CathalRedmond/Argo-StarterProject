@@ -1,10 +1,11 @@
 #include "stdafx.h"
 #include "EnemyFactory.h"
 
-EnemyFactory::EnemyFactory(SDL_Renderer* t_renderer):
+EnemyFactory::EnemyFactory(SDL_Renderer* t_renderer) :
 	m_renderer(t_renderer)
 {
 }
+
 ///<summary>
 ///Setting the rendererer variable now that it isn't null.
 ///</summary>
@@ -16,6 +17,7 @@ void EnemyFactory::initialise(SDL_Renderer* t_renderer)
 void EnemyFactory::createPlayer(Entity& t_entity)
 {
 }
+
 ///<summary>
 ///Creating an Enemy, pass in what enemy is desired. 1 - Melee, 2 - Ranged (WIP) and a reference to an entity. The required components and values will be added. 
 ///All values are set in the FactoryStatSheet.
@@ -36,6 +38,13 @@ void EnemyFactory::createEnemy(int t_type, Entity& t_entity)
 	case 2:
 		break;
 	case 3:
+		t_entity.addComponent(new TransformComponent());
+		t_entity.addComponent(new ForceComponent());
+		t_entity.addComponent(new AiComponent(AITypes::eWaller, AIStates::eSeek, FactoryStatSheet::ENEMY_TURN_RATE / 2.0f, FactoryStatSheet::ENEMY_MAX_SPEED / 2.0f));
+		t_entity.addComponent(new ColliderCircleComponent(Utilities::TILE_SIZE / 2.0f));
+		t_entity.addComponent(new TagComponent(Tag::WallerEnemy));
+		t_entity.addComponent(new HealthComponent(FactoryStatSheet::ENEMY_MAX_HP * 5, FactoryStatSheet::ENEMY_HP));
+		t_entity.addComponent(new VisualComponent("wall_enemy.png", m_renderer));
 		break;
 	}
 }

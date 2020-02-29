@@ -7,15 +7,15 @@ AiSystem::AiSystem(Entity(&t_players)[Utilities::S_MAX_PLAYERS], Entity(&t_enemi
 	m_pickups(t_pickups),
 	m_goal(t_goal),
 	m_eventManager(t_eventManager),
-	m_levelmanager(t_levelManager),
-	m_currentWaypoint(glm::linearRand(0,4))
+	m_levelManager(t_levelManager),
+	m_currentWaypoint(glm::linearRand(0, 4))
 {
-	m_behaviourTree.addChild(new RetreatBehaviour(&m_botEnemyData, m_levelmanager));
-	m_behaviourTree.addChild(new HoldBehaviour(&m_botEnemyData, m_levelmanager));
-	m_behaviourTree.addChild(new GetAmmoBehaviour(&m_botPickupData, m_levelmanager));
-	m_behaviourTree.addChild(new GetHealthBehaviour(&m_botHealthPickupData, m_levelmanager));
-	m_behaviourTree.addChild(new MoveToGoalBehaviour(&m_botGoalData, m_levelmanager));
-	m_behaviourTree.addChild(new MoveToLeaderBehaviour(&m_botLeaderData, m_levelmanager));
+	m_behaviourTree.addChild(new RetreatBehaviour(&m_botEnemyData, m_levelManager));
+	m_behaviourTree.addChild(new HoldBehaviour(&m_botEnemyData, m_levelManager));
+	m_behaviourTree.addChild(new GetAmmoBehaviour(&m_botPickupData, m_levelManager));
+	m_behaviourTree.addChild(new GetHealthBehaviour(&m_botHealthPickupData, m_levelManager));
+	m_behaviourTree.addChild(new MoveToGoalBehaviour(&m_botGoalData, m_levelManager));
+	m_behaviourTree.addChild(new MoveToLeaderBehaviour(&m_botLeaderData, m_levelManager));
 
 	m_waypoints[1].destination = glm::vec2(Utilities::TILE_SIZE * 55, Utilities::TILE_SIZE * 3);
 	m_waypoints[2].destination = glm::vec2(Utilities::TILE_SIZE * 3, Utilities::TILE_SIZE * 37);
@@ -49,6 +49,14 @@ void AiSystem::update(Entity& t_entity)
 		case AITypes::ePlayerBot:
 			playerAI(t_entity);
 			break;
+		case AITypes::eWaller:
+		{
+			HealthComponent* healthComp = static_cast<HealthComponent*>(t_entity.getComponent(ComponentType::Health));
+			wallerAi(posComp, aiComp, forceComp, healthComp);
+			break;
+		}
+		default:
+			break;
 		}
 	}
 }
@@ -56,7 +64,7 @@ void AiSystem::update(Entity& t_entity)
 void AiSystem::meleeAI(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
 {
 	t_aiComponent->setState(AIStates::eWander);
-	Entity* tile = m_levelmanager.findAtPosition(t_posComp->getPos());
+	Entity* tile = m_levelManager.findAtPosition(t_posComp->getPos());
 	glm::vec2 seekPosition = glm::vec2(0, 0);
 	if (tile)
 	{
@@ -120,11 +128,57 @@ void AiSystem::rangedAI(TransformComponent* t_posComp, AiComponent* t_aiComponen
 	}
 }
 
+void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, HealthComponent* t_healthComponent)
+{
+	switch (t_aiComponent->getStates())
+	{
+	case AIStates::eSeek:
+	{
+		if (t_aiComponent->getSeekPos() == glm::vec2(-1, -1))
+		{
+			glm::vec2 pos = getRandomFloorTile() + glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE) / 2.0f;
+			if (pos != glm::vec2(-1, -1))
+			{
+				t_aiComponent->setSeekPos(pos);
+			}
+			else
+			{
+				t_healthComponent->setHealth(0);
+			}
+		}
+		wallerSeek(t_posComp, t_aiComponent, t_forceComponent, t_aiComponent->getSeekPos(), t_healthComponent);
+		break;
+	}
+	default:
+		break;
+	}
+}
+
 void AiSystem::seek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination)
 {
 	glm::vec2 direction = glm::normalize(t_destination - t_posComp->getPos());
 	t_forceComponent->addForce(direction);
 	t_posComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
+}
+
+void AiSystem::wallerSeek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination, HealthComponent* t_healthComponent)
+{
+	if (glm::distance2(t_destination + glm::vec2(Utilities::TILE_SIZE / 2.0f, Utilities::TILE_SIZE / 2.0f), t_posComp->getPos()) < std::pow(Utilities::TILE_SIZE, 2))
+	{
+		Entity* tile = m_levelManager.findAtPosition(t_posComp->getPos());
+		if (tile)
+		{
+			m_levelManager.setToWall(*tile);
+			t_aiComponent->setSeekPos(glm::vec2(-1, -1));
+			t_healthComponent->setHealth(0);
+		}
+	}
+	else
+	{
+		glm::vec2 direction = glm::normalize(t_destination - t_posComp->getPos());
+		t_forceComponent->addForce(direction);
+		t_posComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
+	}
 }
 
 void AiSystem::playerAI(Entity& t_entity)
@@ -334,4 +388,57 @@ void AiSystem::wander(TransformComponent* t_posComp, AiComponent* t_aiComponent,
 void AiSystem::sleep(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
 {
 	//Nothing will add code to awake unit if a target (i.e player) comes within range once discussions are had.
+}
+
+glm::vec2 AiSystem::getRandomFloorTile()
+{
+	Entity* tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
+
+	if (tile && nullptr != tile->getComponent(ComponentType::ColliderAABB))
+	{
+		//tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
+		TileComponent* tileComp = static_cast<TileComponent*>(tile->getComponent(ComponentType::Tile));
+		if (tileComp->getNeighbours()->bottom && tileComp->getNeighbours()->bottom->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->bottom;
+		}
+		else if (tileComp->getNeighbours()->bottomLeft && !tileComp->getNeighbours()->bottomLeft->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->bottomLeft;
+		}
+		else if (tileComp->getNeighbours()->bottomRight && !tileComp->getNeighbours()->bottomRight->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->bottomRight;
+		}
+		else if (tileComp->getNeighbours()->left && !tileComp->getNeighbours()->left->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->left;
+		}
+		else if (tileComp->getNeighbours()->right && !tileComp->getNeighbours()->right->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->right;
+		}
+		else if (tileComp->getNeighbours()->top && !tileComp->getNeighbours()->top->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->top;
+		}
+		else if (tileComp->getNeighbours()->topLeft && !tileComp->getNeighbours()->topLeft->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->topLeft;
+		}
+		else if (tileComp->getNeighbours()->topRight&& !tileComp->getNeighbours()->topRight->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->topRight;
+		}
+		else
+		{
+			return glm::vec2(-1, -1);
+		}
+	}
+	else
+	{
+		return glm::vec2(-1, -1);
+	}
+
+	return static_cast<TransformComponent*>(tile->getComponent(ComponentType::Transform))->getPos();
 }
