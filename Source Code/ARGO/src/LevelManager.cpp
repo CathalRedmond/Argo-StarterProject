@@ -1,18 +1,19 @@
 #include "stdafx.h"
 #include "LevelManager.h"
 
-LevelManager::LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager, LightManager& t_lightManager):
+LevelManager::LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager,LightManager& t_lightManager, EventManager& t_eventManager) :
 	m_renderer(t_renderer),
 	m_players(t_players),
 	m_renderSystem(t_renderSystem),
 	m_projectilemanager(t_projectileManager),
+	m_eventManager{ t_eventManager },
 	m_lightManager(t_lightManager)
 {
 }
 
 void LevelManager::setupLevel()
 {
-	if (!m_levelTiles.empty())
+ 	if (!m_levelTiles.empty())
 	{
 		for (Entity& tile : m_levelTiles)
 		{
@@ -23,12 +24,28 @@ void LevelManager::setupLevel()
 	m_levelTiles.reserve(Utilities::LEVEL_TILE_HEIGHT * Utilities::LEVEL_TILE_WIDTH);
 	for (int i = 0; i < Utilities::LEVEL_TILE_HEIGHT; i++)
 	{
+		if (i % 5 == 0)
+		{
+			m_eventManager.emitEvent<UpdateLoading>(UpdateLoading{});
+ 		}
 		for (int j = 0; j < Utilities::LEVEL_TILE_WIDTH; j++)
 		{
 			m_levelTiles.emplace_back();
 			m_levelTiles.back().addComponent(new TransformComponent(glm::vec2(j * Utilities::TILE_SIZE, i * Utilities::TILE_SIZE)));
+			TransformComponent* transformComp = static_cast<TransformComponent*>(m_levelTiles.back().getComponent(ComponentType::Transform));
+			int rotationScalar = glm::linearRand(0, 3);
+			transformComp->setRotation(0 + (90 * rotationScalar));
 			m_levelTiles.back().addComponent(new TagComponent(Tag::Tile));
-			m_levelTiles.back().addComponent(new VisualComponent("wallSmall.png", m_renderer));
+			int defaultWallChance = glm::linearRand(1, 5);
+			if (defaultWallChance != 4 && defaultWallChance !=5 )
+			{
+				m_levelTiles.back().addComponent(new VisualComponent("wallSmall1.png", m_renderer));
+			}
+			else
+			{
+				int wallIndex = glm::linearRand(2, 5);
+				m_levelTiles.back().addComponent(new VisualComponent("wallSmall" + std::to_string(wallIndex) + ".png", m_renderer));
+			}
 			m_levelTiles.back().addComponent(new ColliderAABBComponent(glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE)));
 			m_levelTiles.back().addComponent(new TileComponent());
 			m_levelTiles.back().addComponent(new HealthComponent(Utilities::WALL_HEALTH, Utilities::WALL_HEALTH));
@@ -36,7 +53,7 @@ void LevelManager::setupLevel()
 			m_levelTiles.back().addComponent(new lightFieldComponent());
 		}
 	}
-	setTileNeighbours();
+ 	setTileNeighbours();
 }
 
 void LevelManager::update(BaseSystem* t_system)
@@ -106,6 +123,10 @@ void LevelManager::createRoom(glm::vec2 t_startPosition, int t_width, int t_heig
 	Entity* startTile = findAtPosition(t_startPosition * (float)Utilities::TILE_SIZE);
 	for (int i = 0; i < t_width; i++)
 	{
+		if (i % 5 == 0)
+		{
+			m_eventManager.emitEvent<UpdateLoading>(UpdateLoading{});
+		}
 		Entity* currentTile = startTile;
 		for (int j = 0; j < t_height; j++)
 		{
@@ -241,7 +262,7 @@ void LevelManager::setTileLight(Entity* t_entity, std::vector<Entity*>& t_queue,
 {
 	lightFieldComponent* lightField = static_cast<lightFieldComponent*>(t_entity->getComponent(ComponentType::LightField));
 	TransformComponent* transform = static_cast<TransformComponent*>(t_entity->getComponent(ComponentType::Transform));
-	if (lightField && lightField->getWeight() > t_newWeight && transform)
+	if (lightField && lightField->getWeight() > t_newWeight&& transform)
 	{
 		lightField->setWeight(t_newWeight);
 		if (!static_cast<ColliderAABBComponent*>(t_entity->getComponent(ComponentType::ColliderAABB)) && t_newWeight < MAX_LIGHT_WEIGHT)
@@ -314,7 +335,7 @@ void LevelManager::setNeighbourWeights(Entity* t_entity, std::vector<Entity*>& t
 		{
 			setTileWeight(neighbours->bottom, t_entity, t_queue, newWeight);
 		}
-		if (neighbours->topLeft && neighbours->top && neighbours->left && 
+		if (neighbours->topLeft && neighbours->top && neighbours->left &&
 			!static_cast<ColliderAABBComponent*>(neighbours->top->getComponent(ComponentType::ColliderAABB)) &&
 			!static_cast<ColliderAABBComponent*>(neighbours->left->getComponent(ComponentType::ColliderAABB)))
 		{

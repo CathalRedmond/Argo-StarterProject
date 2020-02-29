@@ -10,7 +10,7 @@ bool cleanUpEnemies(const Entity& t_entity)
 GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, Controller t_controllers[Utilities::S_MAX_PLAYERS], CommandSystem& t_commandSystem, InputSystem& t_input, RenderSystem& t_renderSystem) :
 	m_eventManager{ t_eventManager },
 	m_controllers{ *t_controllers },
-	m_levelManager{ t_renderer, m_players, m_renderSystem, m_projectileManager, m_lightManager },
+	m_levelManager{ t_renderer, m_players, m_renderSystem, m_projectileManager, m_lightManager, t_eventManager },
 	m_enemyManager{ t_renderer, Utilities::ENEMY_INITIAL_SPAWN_DELAY, t_eventManager, m_transformSystem, m_collisionSystem, m_healthSystem, m_aiSystem, m_renderSystem, m_levelManager },
 	m_renderer{ t_renderer },
 	m_transformSystem{ m_eventManager },
@@ -23,7 +23,7 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_commandSystem{ t_commandSystem },
 	m_inputSystem{ t_input },
 	m_renderSystem{ t_renderSystem },
-	m_hudManager(m_players),
+	m_hudManager(m_players,m_eventManager),
 	m_particleManager(m_eventManager, m_particleSystem),
 	m_bloodManager(m_particleSystem, m_players),
 	m_lightManager(m_eventManager),
@@ -85,7 +85,7 @@ void GameScreen::processEvents(SDL_Event* t_event)
 			break;
 		}
 		case SDLK_RETURN:
-		{ 
+		{
 			for (Entity& p : m_players)
 			{
 				(static_cast<HealthComponent*>(p.getComponent(ComponentType::Health))->setHealth(0));
@@ -94,7 +94,7 @@ void GameScreen::processEvents(SDL_Event* t_event)
 			break;
 		}
 		case SDLK_1:
-		{ 
+		{
 			m_eventManager.emitEvent<GameOver>(GameOver{ });
 			break;
 		}
@@ -317,6 +317,7 @@ void GameScreen::activateGoal(const GoalHit& t_event)
 	if (m_goalState == GoalState::Charged)
 	{
 		m_currentLevel++;
+		m_eventManager.emitEvent<UpdateAchievement>(UpdateAchievement{ 0, 1 });
 		newLevel();
 	}
 }
@@ -384,7 +385,7 @@ void GameScreen::gameOver(const GameOver& t_event)
 		{
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Pressed)][index] =
 			{
- 				ButtonCommandPair(ButtonType::B, new GoToMainMenuCommand())
+				ButtonCommandPair(ButtonType::B, new GoToMainMenuCommand())
 			};
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Held)][index] = ButtonCommandMap();
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Released)][index] = ButtonCommandMap();
@@ -395,6 +396,12 @@ void GameScreen::gameOver(const GameOver& t_event)
 		}
 	}
 }
+
+void GameScreen::updatePlayerColour(const UpdatePlayerColour& t_event)
+{
+	VisualComponent* visComp = static_cast<VisualComponent*>(m_players[t_event.playerIndex].getComponent(ComponentType::Visual));
+	visComp->setColor(t_event.colour.x, t_event.colour.y, t_event.colour.z);
+} 
 
 void GameScreen::preRender()
 {
@@ -479,5 +486,7 @@ void GameScreen::initialise(SDL_Renderer* t_renderer, ButtonCommandMap t_control
 	m_projectileManager.init();
 	m_pickUpManager.init(m_renderer);
 	m_hudManager.init(t_renderer);
-	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));
+	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));	
+	m_eventManager.subscribeToEvent<UpdatePlayerColour>(std::bind(&GameScreen::updatePlayerColour, this, std::placeholders::_1));
+
 }
