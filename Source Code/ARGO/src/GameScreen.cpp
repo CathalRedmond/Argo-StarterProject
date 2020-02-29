@@ -25,19 +25,20 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_renderSystem{ t_renderSystem },
 	m_hudManager(m_players),
 	m_particleManager(m_eventManager, m_particleSystem),
-	m_currentLevel(1),
+	m_currentLevel(2),
 	m_gameOver(false),
 	m_goalCurrentCharge(0),
 	m_goalIsCharging(false),
-	m_goalState(GoalState::Inactive)
+	m_goalState(GoalState::Inactive),
+	m_bloodManager(m_particleSystem, m_players)
 {
 	t_eventManager.subscribeToEvent<GoalHit>(std::bind(&GameScreen::activateGoal, this, std::placeholders::_1));
 
 	m_levelData[0].goalPos = glm::vec2(51, 36) * (float)Utilities::TILE_SIZE;
 	m_levelData[0].goalChargeTime = 1200;
-	m_levelData[1].goalPos = glm::vec2(51, 36) * (float)Utilities::TILE_SIZE;
+	m_levelData[1].goalPos = glm::vec2(55, 10) * (float)Utilities::TILE_SIZE;
 	m_levelData[1].goalChargeTime = 3000;
-	m_levelData[2].goalPos = glm::vec2(51, 36) * (float)Utilities::TILE_SIZE;
+	m_levelData[2].goalPos = glm::vec2(30, 20) * (float)Utilities::TILE_SIZE;
 	m_levelData[2].goalChargeTime = 6000;
 }
 
@@ -59,6 +60,7 @@ void GameScreen::update(float t_deltaTime)
 		m_pickUpManager.update(t_deltaTime);
 		m_hudManager.update();
 		m_particleManager.update(t_deltaTime);
+		m_bloodManager.update(t_deltaTime);
 	}
 }
 
@@ -109,6 +111,7 @@ void GameScreen::render(SDL_Renderer* t_renderer)
 	preRender();
 	m_levelManager.render(t_renderer, &m_renderSystem);
 	m_enemyManager.render(t_renderer);
+	m_bloodManager.render(t_renderer, &m_renderSystem);
 	for (Entity& player : m_players)
 	{
 		if (static_cast<HealthComponent*>(player.getComponent(ComponentType::Health))->isAlive())
@@ -220,7 +223,8 @@ void GameScreen::createLevel1()
 void GameScreen::createLevel2()
 {
 	m_levelManager.createRoom(glm::vec2(1, 1), 20, 12);
-	m_levelManager.createRoom(glm::vec2(22, 1), 10, 8);
+	m_levelManager.createRoom(glm::vec2(21, 1), 25, 7);
+	m_levelManager.createRoom(glm::vec2(49, 1), 10, 15);
 	m_levelManager.createRoom(glm::vec2(1, 14), 8, 20);
 	m_levelManager.createRoom(glm::vec2(9, 30), 8, 9);
 	m_levelManager.createRoom(glm::vec2(10, 14), 20, 9);
@@ -229,10 +233,21 @@ void GameScreen::createLevel2()
 	m_levelManager.createRoom(glm::vec2(30, 8), 8, 20);
 	m_levelManager.createRoom(glm::vec2(29, 31), 30, 8);
 	m_levelManager.createRoom(glm::vec2(38, 21), 15, 10);
+	m_levelManager.createRoom(glm::vec2(40, 9), 5, 13);
 }
 
 void GameScreen::createLevel3()
 {
+	m_levelManager.createRoom(glm::vec2(1, 1), 58, 8);
+	m_levelManager.createRoom(glm::vec2(51, 9), 8, 30);
+	m_levelManager.createRoom(glm::vec2(1, 9), 8, 30);
+	m_levelManager.createRoom(glm::vec2(1, 31), 58, 8);
+	m_levelManager.createRoom(glm::vec2(28, 9), 4, 1);
+	m_levelManager.createRoom(glm::vec2(28, 30), 4, 1);
+	m_levelManager.createRoom(glm::vec2(9, 18), 1, 4);
+	m_levelManager.createRoom(glm::vec2(50, 18), 1, 4);
+
+	m_levelManager.createRoom(glm::vec2(10, 10), 40, 20);
 }
 
 void GameScreen::setupGoal()

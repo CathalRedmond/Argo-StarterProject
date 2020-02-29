@@ -113,6 +113,8 @@ namespace Utilities
 	//Player Death
 	const glm::uvec4 PRIMARY_PLAYER_DEATH_COLOUR{ 50,0,0,255 };
 	const glm::uvec4 SECONDARY_PLAYER_DEATH_COLOUR{ 200,0,0,255 };
+	const glm::uvec4 PRIMARY_PLAYER_BLOOD_COLOUR{ 200,0,0,255 };
+	const glm::uvec4 SECONDARY_PLAYER_BLOOD_COLOUR{ 250,0,0,255 };
 	const float PLAYER_DEATH_MIN_PARTICLE_SIZE = 2.0f;
 	const float PLAYER_DEATH_MAX_PARTICLE_SIZE = 12.0f;
 

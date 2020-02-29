@@ -28,6 +28,11 @@ void ParticleManager::createParticleEmitter(Entity& t_entity)
 		Utilities::PARTICLES_PER_SECOND));
 }
 
+void ParticleManager::createBloodEmitter(Entity& t_entity)
+{
+
+}
+
 /// <summary>
 /// Function called On Enemy Death
 /// </summary>
