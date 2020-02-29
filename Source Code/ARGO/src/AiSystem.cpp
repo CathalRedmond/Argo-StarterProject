@@ -7,15 +7,15 @@ AiSystem::AiSystem(Entity(&t_players)[Utilities::S_MAX_PLAYERS], Entity(&t_enemi
 	m_pickups(t_pickups),
 	m_goal(t_goal),
 	m_eventManager(t_eventManager),
-	m_levelmanager(t_levelManager),
-	m_currentWaypoint(glm::linearRand(0,4))
+	m_levelManager(t_levelManager),
+	m_currentWaypoint(glm::linearRand(0, 4))
 {
-	m_behaviourTree.addChild(new RetreatBehaviour(&m_botEnemyData, m_levelmanager));
-	m_behaviourTree.addChild(new HoldBehaviour(&m_botEnemyData, m_levelmanager));
-	m_behaviourTree.addChild(new GetAmmoBehaviour(&m_botPickupData, m_levelmanager));
-	m_behaviourTree.addChild(new GetHealthBehaviour(&m_botHealthPickupData, m_levelmanager));
-	m_behaviourTree.addChild(new MoveToGoalBehaviour(&m_botGoalData, m_levelmanager));
-	m_behaviourTree.addChild(new MoveToLeaderBehaviour(&m_botLeaderData, m_levelmanager));
+	m_behaviourTree.addChild(new RetreatBehaviour(&m_botEnemyData, m_levelManager));
+	m_behaviourTree.addChild(new HoldBehaviour(&m_botEnemyData, m_levelManager));
+	m_behaviourTree.addChild(new GetAmmoBehaviour(&m_botPickupData, m_levelManager));
+	m_behaviourTree.addChild(new GetHealthBehaviour(&m_botHealthPickupData, m_levelManager));
+	m_behaviourTree.addChild(new MoveToGoalBehaviour(&m_botGoalData, m_levelManager));
+	m_behaviourTree.addChild(new MoveToLeaderBehaviour(&m_botLeaderData, m_levelManager));
 
 	m_waypoints[1].destination = glm::vec2(Utilities::TILE_SIZE * 55, Utilities::TILE_SIZE * 3);
 	m_waypoints[2].destination = glm::vec2(Utilities::TILE_SIZE * 3, Utilities::TILE_SIZE * 37);
@@ -49,6 +49,11 @@ void AiSystem::update(Entity& t_entity)
 		case AITypes::ePlayerBot:
 			playerAI(t_entity);
 			break;
+		case AITypes::eWaller:
+			wallerAi(posComp, aiComp, forceComp);
+			break;
+		default:
+			break;
 		}
 	}
 }
@@ -56,7 +61,7 @@ void AiSystem::update(Entity& t_entity)
 void AiSystem::meleeAI(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
 {
 	t_aiComponent->setState(AIStates::eWander);
-	Entity* tile = m_levelmanager.findAtPosition(t_posComp->getPos());
+	Entity* tile = m_levelManager.findAtPosition(t_posComp->getPos());
 	glm::vec2 seekPosition = glm::vec2(0, 0);
 	if (tile)
 	{
@@ -120,8 +125,29 @@ void AiSystem::rangedAI(TransformComponent* t_posComp, AiComponent* t_aiComponen
 	}
 }
 
+void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
+{
+	switch (t_aiComponent->getStates())
+	{
+	case AIStates::eSeek:
+		
+		seek(t_posComp, t_aiComponent, t_forceComponent, getRandomFloorTile());
+		break;
+	default:
+		break;
+	}
+}
+
 void AiSystem::seek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination)
 {
+	if (glm::distance2(t_destination, t_posComp->getPos()) < std::pow(Utilities::ENEMY_RADIUS / 4.0f, 2))
+	{
+		Entity* tile = m_levelManager.findAtPosition(t_posComp->getPos());
+		if (tile)
+		{
+			m_levelManager.setToWall(*tile);
+		}
+	}
 	glm::vec2 direction = glm::normalize(t_destination - t_posComp->getPos());
 	t_forceComponent->addForce(direction);
 	t_posComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
@@ -334,4 +360,16 @@ void AiSystem::wander(TransformComponent* t_posComp, AiComponent* t_aiComponent,
 void AiSystem::sleep(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
 {
 	//Nothing will add code to awake unit if a target (i.e player) comes within range once discussions are had.
+}
+
+glm::vec2 AiSystem::getRandomFloorTile()
+{
+	Entity* tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
+
+	while (nullptr != tile->getComponent(ComponentType::ColliderAABB))
+	{
+		tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
+	}
+
+	return static_cast<TransformComponent*>(tile->getComponent(ComponentType::Transform))->getPos();
 }

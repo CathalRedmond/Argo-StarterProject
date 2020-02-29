@@ -74,18 +74,14 @@ void GameScreen::processEvents(SDL_Event* t_event)
 	{
 		switch (t_event->key.keysym.sym)
 		{
+#ifdef _DEBUG
 		case SDLK_HOME:
 		{
 			m_eventManager.emitEvent<ChangeScreen>(ChangeScreen{ MenuStates::MainMenu });
 			break;
 		}
-		case SDLK_DELETE:
-		{
-			m_players[0].removeCompType(ComponentType::Input);
-			break;
-		}
 		case SDLK_RETURN:
-		{ 
+		{
 			for (Entity& p : m_players)
 			{
 				(static_cast<HealthComponent*>(p.getComponent(ComponentType::Health))->setHealth(0));
@@ -94,10 +90,12 @@ void GameScreen::processEvents(SDL_Event* t_event)
 			break;
 		}
 		case SDLK_1:
-		{ 
+		{
 			m_eventManager.emitEvent<GameOver>(GameOver{ });
 			break;
 		}
+#endif // _DEBUG
+
 		default:
 			break;
 		}

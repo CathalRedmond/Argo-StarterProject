@@ -17,9 +17,11 @@ class TileComponent :
 	public Component
 {
 public:
-	TileComponent();
+	TileComponent(int t_index);
 	Neighbours* getNeighbours();
+	int getIndex() const;
 private:
 	Neighbours m_neighbours;
+	int m_index;
 };
 

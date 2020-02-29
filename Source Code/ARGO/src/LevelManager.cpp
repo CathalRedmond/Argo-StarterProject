@@ -19,6 +19,7 @@ void LevelManager::setupLevel()
 			tile.removeAllComponents();
 		}
 		m_levelTiles.clear();
+		m_floorTiles.clear();
 	}
 	m_levelTiles.reserve(Utilities::LEVEL_TILE_HEIGHT * Utilities::LEVEL_TILE_WIDTH);
 	for (int i = 0; i < Utilities::LEVEL_TILE_HEIGHT; i++)
@@ -30,7 +31,7 @@ void LevelManager::setupLevel()
 			m_levelTiles.back().addComponent(new TagComponent(Tag::Tile));
 			m_levelTiles.back().addComponent(new VisualComponent("wallSmall.png", m_renderer));
 			m_levelTiles.back().addComponent(new ColliderAABBComponent(glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE)));
-			m_levelTiles.back().addComponent(new TileComponent());
+			m_levelTiles.back().addComponent(new TileComponent(j + i * Utilities::LEVEL_TILE_HEIGHT));
 			m_levelTiles.back().addComponent(new HealthComponent(Utilities::WALL_HEALTH, Utilities::WALL_HEALTH));
 			m_levelTiles.back().addComponent(new FlowFieldComponent());
 			m_levelTiles.back().addComponent(new lightFieldComponent());
@@ -60,6 +61,7 @@ void LevelManager::checkWallDamage()
 		if (entity.getComponent(ComponentType::ColliderAABB) && static_cast<HealthComponent*>(entity.getComponent(ComponentType::Health))->getHealth() <= 0)
 		{
 			setToFloor(entity);
+			//m_floorTiles.push_back(entity);
 		}
 	}
 }
@@ -89,6 +91,15 @@ void LevelManager::setToWall(Entity& t_entity)
 	t_entity.addComponent(new VisualComponent("wall_4.png", m_renderer));
 	t_entity.addComponent(new ColliderAABBComponent(glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE)));
 	static_cast<HealthComponent*>(t_entity.getComponent(ComponentType::Health))->setHealth(Utilities::WALL_HEALTH);
+	int index = static_cast<TileComponent*>(t_entity.getComponent(ComponentType::Tile))->getIndex();
+
+	for (int i = m_floorTiles.size() - 1; i >= 0; i--)
+	{
+		if (m_floorTiles.at(i) == index)
+		{
+			m_floorTiles.erase(m_floorTiles.begin() + i);
+		}
+	}
 }
 
 void LevelManager::setToFloor(Entity& t_entity)
@@ -110,6 +121,7 @@ void LevelManager::createRoom(glm::vec2 t_startPosition, int t_width, int t_heig
 		for (int j = 0; j < t_height; j++)
 		{
 			setToFloor(*currentTile);
+			m_floorTiles.push_back(static_cast<TileComponent*>(currentTile->getComponent(ComponentType::Tile))->getIndex());
 			currentTile = static_cast<TileComponent*>(currentTile->getComponent(ComponentType::Tile))->getNeighbours()->bottom;
 		}
 		startTile = static_cast<TileComponent*>(startTile->getComponent(ComponentType::Tile))->getNeighbours()->right;

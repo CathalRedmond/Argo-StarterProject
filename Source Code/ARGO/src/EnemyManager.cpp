@@ -24,6 +24,11 @@ void EnemyManager::init()
 	{
 		factory->createEnemy(1, enemy);
 	}
+	for (auto& waller : m_wallers)
+	{
+		factory->createEnemy(3, waller);
+	}
+	delete factory;
 }
 
 void EnemyManager::update(float t_dt)
@@ -45,6 +50,17 @@ void EnemyManager::update(float t_dt)
 			m_physicsSystem.update(enemy, t_dt);
 			m_collisionSystem.update(enemy);
 			m_aiSytem.update(enemy);
+		}
+	}
+	for (auto& waller : m_wallers)
+	{
+		HealthComponent* hpComp = static_cast<HealthComponent*>(waller.getComponent(ComponentType::Health));
+		if (hpComp && hpComp->isAlive())
+		{
+			m_healthSystem.update(waller, t_dt);
+			m_physicsSystem.update(waller, t_dt);
+			m_collisionSystem.update(waller);
+			m_aiSytem.update(waller);
 		}
 	}
 }

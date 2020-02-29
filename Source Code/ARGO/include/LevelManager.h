@@ -53,6 +53,7 @@ private:
 	void addToPath(Entity* t_child, Entity* t_parent, glm::vec2 targetPos, std::priority_queue<Entity*, std::vector<Entity*>, LessThanByTotalDistance>* t_queue);
 
 	std::vector<Entity> m_levelTiles;
+	std::vector<int> m_floorTiles;
 	Entity(&m_players)[Utilities::S_MAX_PLAYERS];
 	SDL_Renderer* m_renderer;
 	RenderSystem& m_renderSystem;

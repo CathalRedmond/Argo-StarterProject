@@ -5,7 +5,7 @@ enum class Tag
 {
 	Player,
 	Enemy,
-	TileEnemy,
+	WallerEnemy,
 	PlayerBullet,
 	EnemyBullet,
 	Tile,

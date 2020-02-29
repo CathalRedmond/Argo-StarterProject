@@ -27,6 +27,7 @@ public:
 private:
 	static const int ENEMY_BASIC_RADIUS = 24;
 	Entity m_enemies[Utilities::ENEMY_POOL_SIZE];
+	Entity m_wallers[Utilities::WALLERS_POOL_SIZE];
 	int m_nextEnemy;
 	float m_spawnEnemyTimer;
 	int m_difficultyLevel;

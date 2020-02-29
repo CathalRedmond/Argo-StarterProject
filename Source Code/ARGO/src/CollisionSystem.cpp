@@ -50,8 +50,8 @@ void CollisionSystem::handleCollisions()
 		case Tag::Enemy:
 			handleEnemyCollision(m_circleColliderBuffer[i]);
 			break;
-		case Tag::TileEnemy:
-			handleEnemyCollision(m_circleColliderBuffer[i]);
+		case Tag::WallerEnemy:
+			handleWallerEnemyCollision(m_circleColliderBuffer[i]);
 			break;
 		case Tag::PlayerBullet:
 			handlePlayerBulletCollision(m_circleColliderBuffer[i]);
@@ -192,7 +192,7 @@ void CollisionSystem::handlePlayerCollision(Entity* t_player)
 		case Tag::Tile:
 			playerToWall(t_player, other);
 			break;
-		case Tag::TileEnemy:
+		case Tag::WallerEnemy:
 			playerToWall(t_player, other);
 		case Tag::PickUp:
 			playerToPickUp(t_player, other);
@@ -228,7 +228,7 @@ void CollisionSystem::handlePlayerBulletCollision(Entity* t_playerBullet)
 		case Tag::Tile:
 			playerBulletToWall(t_playerBullet, other);
 			break;
-		case Tag::TileEnemy:
+		case Tag::WallerEnemy:
 			playerBulletToWall(t_playerBullet, other);
 			break;
 		default:
@@ -298,7 +298,7 @@ void CollisionSystem::handleEnemyCollision(Entity* t_enemy)
 	}
 }
 
-void CollisionSystem::handleTileEnemyCollision(Entity* t_enemy)
+void CollisionSystem::handleWallerEnemyCollision(Entity* t_enemy)
 {
 	TransformComponent* rectPosition = static_cast<TransformComponent*>(t_enemy->getComponent(ComponentType::Transform));
 	int radius = static_cast<ColliderCircleComponent*>(t_enemy->getComponent(ComponentType::ColliderCircle))->getRadius();
@@ -322,9 +322,10 @@ void CollisionSystem::handleTileEnemyCollision(Entity* t_enemy)
 			}
 		}
 		break;
-		case Tag::Tile:
-			enemyToWall(t_enemy, other);
-			break;
+		//he be giving 0 fucks about the walls
+		//case Tag::Tile:
+		//	enemyToWall(t_enemy, other);
+		//	break;
 		default:
 			break;
 		}
