@@ -237,6 +237,15 @@ void Entity::addComponent(Component* t_c)
 			}
 			break;
 		}
+		case ComponentType::LightSource:
+		{
+			if (!m_components.at(COMPONENT_ID::LIGHT_SOURCE_ID))
+			{
+				m_components.at(COMPONENT_ID::LIGHT_SOURCE_ID) = t_c;
+				return;
+			}
+			break;
+		}
 		case ComponentType::FSM:
 		{
 			if (!m_components.at(COMPONENT_ID::FSM_ID))
@@ -500,6 +509,16 @@ void Entity::removeCompType(ComponentType t_type)
 			}
 			break;
 		}
+		case ComponentType::LightSource:
+		{
+			if (m_components.at(COMPONENT_ID::LIGHT_SOURCE_ID))
+			{
+				delete m_components.at(COMPONENT_ID::LIGHT_SOURCE_ID);
+				m_components.at(COMPONENT_ID::LIGHT_SOURCE_ID) = nullptr;
+				return;
+			}
+			break;
+		}
 		case ComponentType::FSM:
 		{
 			if (m_components.at(COMPONENT_ID::FSM_ID))
@@ -591,6 +610,8 @@ Component* Entity::getComponent(ComponentType t_type) const
 			return m_components.at(COMPONENT_ID::WEAPON_ID);
 		case ComponentType::Pathing:
 			return m_components.at(COMPONENT_ID::PATHING_ID);
+		case ComponentType::LightSource:
+			return m_components.at(COMPONENT_ID::LIGHT_SOURCE_ID);
 		case ComponentType::FSM:
 			return m_components.at(COMPONENT_ID::FSM_ID);
 		default:

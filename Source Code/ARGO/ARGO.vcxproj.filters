@@ -354,6 +354,9 @@
     <ClCompile Include="src\LightManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\LightSourceComponent.cpp">
+      <Filter>Source Files\ECS\Components</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Game.h">
@@ -652,6 +655,9 @@
     </ClInclude>
     <ClInclude Include="include\LightManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\LightSourceComponent.h">
+      <Filter>Header Files\ECS\Components</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

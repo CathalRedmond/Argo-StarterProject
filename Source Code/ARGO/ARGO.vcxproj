@@ -30,6 +30,7 @@
     <ClCompile Include="src\GoToMainMenuCommand.cpp" />
     <ClCompile Include="src\HelpScreen.cpp" />
     <ClCompile Include="src\LightManager.cpp" />
+    <ClCompile Include="src\LightSourceComponent.cpp" />
     <ClCompile Include="src\MenuCancelCommand.cpp" />
     <ClCompile Include="src\MenuConfirmCommand.cpp" />
     <ClCompile Include="src\HUDComponent.cpp" />
@@ -127,6 +128,7 @@
     <ClInclude Include="include\GoToMainMenuCommand.h" />
     <ClInclude Include="include\HelpScreen.h" />
     <ClInclude Include="include\LightManager.h" />
+    <ClInclude Include="include\LightSourceComponent.h" />
     <ClInclude Include="include\MenuCancelCommand.h" />
     <ClInclude Include="include\MenuConfirmCommand.h" />
     <ClInclude Include="include\HealthComponent.h" />
