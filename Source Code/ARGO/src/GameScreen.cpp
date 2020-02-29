@@ -317,6 +317,7 @@ void GameScreen::activateGoal(const GoalHit& t_event)
 	if (m_goalState == GoalState::Charged)
 	{
 		m_currentLevel++;
+		m_eventManager.emitEvent<UpdateAchievement>(UpdateAchievement{ 0, 1 });
 		newLevel();
 	}
 }
