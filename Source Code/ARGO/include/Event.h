@@ -94,6 +94,12 @@ struct UpdatePlayerColour
 	int playerIndex;
 };
 
+struct UpdatePlayerColour
+{
+	glm::vec3 colour;
+	int playerIndex;
+};
+
 struct LoadGame
 {
 };
