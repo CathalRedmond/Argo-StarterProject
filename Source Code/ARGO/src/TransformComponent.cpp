@@ -38,8 +38,8 @@ TransformComponent::TransformComponent(bool t_alwaysOnScreen) :
 	Component(ComponentType::Transform),
 	m_alwaysOnScreen(t_alwaysOnScreen)
 {
-	m_pos.x = glm::linearRand(50, 700);
-	m_pos.y = glm::linearRand(50, 700);
+	m_pos.x = glm::linearRand(128, 512);
+	m_pos.y = glm::linearRand(128, 512);
 	m_rotation = 0.0f;
 	m_leftRotation = -1;
 	m_rightRotation = -1;
