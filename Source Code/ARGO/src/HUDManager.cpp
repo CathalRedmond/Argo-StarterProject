@@ -1,8 +1,9 @@
 #include "stdafx.h"
 #include "HUDManager.h"
 
-HUDManager::HUDManager(Entity(&t_players)[Utilities::S_MAX_PLAYERS]) :
-	m_players{ t_players }
+HUDManager::HUDManager(Entity(&t_players)[Utilities::S_MAX_PLAYERS], EventManager& t_eventManager) :
+	m_players{ t_players },
+	m_eventManager{t_eventManager}
 {
 }
 /// <summary>
@@ -24,6 +25,7 @@ void HUDManager::init(SDL_Renderer* t_renderer)
 /// </summary>
 void HUDManager::update()
 {
+	int playerIndex = 0;
 	for (auto& hudElement : m_playerHUD) {
 		//Get the layout Data
 		HUDComponent* hudComp = static_cast<HUDComponent*>(hudElement.HUDLayoutData.getComponent(ComponentType::HUD));
@@ -107,6 +109,7 @@ void HUDManager::update()
 		//Applies the size change.
 		if (hudElement.previousSize != hudComp->getCurrentHealthSize())
 		{
+			m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{255,0,0}, playerIndex });
 			colorComp->setColor(Colour{ 255,255,255,255 });
 			hudElement.timeSinceDamageTaken = SDL_GetTicks();
 		}
@@ -116,6 +119,7 @@ void HUDManager::update()
 		}
 		if (SDL_GetTicks() - hudElement.timeSinceDamageTaken > 200)
 		{
+			m_eventManager.emitEvent(UpdatePlayerColour{ glm::vec3{255,255,255}, playerIndex });
 			colorComp->setColor(Colour{ 255,0,0,255 });
 			hudElement.timeSinceDamageTaken = std::numeric_limits<float>::max();
 
@@ -135,6 +139,7 @@ void HUDManager::update()
 		//Avatar Texture
 		transformComp = static_cast<TransformComponent*>(hudElement.HUDAvatarIcon.getComponent(ComponentType::Transform));
 		transformComp->setPos(hudComp->getHUDPosition().x + hudComp->getAvatarOffset().x, hudComp->getHUDPosition().y + hudComp->getAvatarOffset().y);
+		playerIndex++;
 	}
 }
 /// <summary>

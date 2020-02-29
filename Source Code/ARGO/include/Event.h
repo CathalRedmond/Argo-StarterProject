@@ -83,6 +83,12 @@ struct GameOver
 
 };
 
+struct UpdatePlayerColour
+{
+	glm::vec3 colour;
+	int playerIndex;
+};
+
 class BaseEvent
 {
 protected:

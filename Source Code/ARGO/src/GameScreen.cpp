@@ -23,7 +23,7 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_commandSystem{ t_commandSystem },
 	m_inputSystem{ t_input },
 	m_renderSystem{ t_renderSystem },
-	m_hudManager(m_players),
+	m_hudManager(m_players,m_eventManager),
 	m_particleManager(m_eventManager, m_particleSystem),
 	m_bloodManager(m_particleSystem, m_players)
 {
@@ -259,6 +259,12 @@ void GameScreen::gameOver(const GameOver& t_event)
 	}
 }
 
+void GameScreen::updatePlayerColour(const UpdatePlayerColour& t_event)
+{
+	VisualComponent* visComp = static_cast<VisualComponent*>(m_players[t_event.playerIndex].getComponent(ComponentType::Visual));
+	visComp->setColor(t_event.colour.x, t_event.colour.y, t_event.colour.z);
+}
+
 void GameScreen::preRender()
 {
 	// Setting the focus point for the camera.
@@ -327,5 +333,7 @@ void GameScreen::initialise(SDL_Renderer* t_renderer, ButtonCommandMap t_control
 	createGoal();
 	m_pickUpManager.init(m_renderer);
 	m_hudManager.init(t_renderer);
-	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));
+	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));	
+	m_eventManager.subscribeToEvent<UpdatePlayerColour>(std::bind(&GameScreen::updatePlayerColour, this, std::placeholders::_1));
+
 }

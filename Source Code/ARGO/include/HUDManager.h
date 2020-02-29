@@ -32,7 +32,7 @@ struct HUDBlock
 class HUDManager
 {
 public:
-	HUDManager(Entity(&t_players)[Utilities::S_MAX_PLAYERS]);
+	HUDManager(Entity(&t_players)[Utilities::S_MAX_PLAYERS], EventManager& t_eventManager);
 	void init(SDL_Renderer* t_renderer);
 	void update();
 	void render(SDL_Renderer* t_renderer, RenderSystem* t_system);
@@ -45,6 +45,8 @@ private:
 	Entity(&m_players)[Utilities::S_MAX_PLAYERS];
 	SDL_Renderer* m_renderer;
 	const int DAMAGE_SHOW_TIME = 200;
+
+	EventManager& m_eventManager;
 
 };
 

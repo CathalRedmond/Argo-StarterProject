@@ -46,7 +46,7 @@ public:
 	void updateLevelManager();
 	void setControllerButtonMap(ButtonCommandMap t_controllerMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS]);
 	void gameOver(const GameOver& t_event);
-
+	void updatePlayerColour(const UpdatePlayerColour& t_event);
 
 	Entity m_gameOverPopup;
 
