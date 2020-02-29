@@ -22,6 +22,7 @@ public:
 	void createEnemyAtTile(Entity* t_tile);
 	Entity(&getEnemies())[Utilities::ENEMY_POOL_SIZE];
 	void killAll();
+	void setDifficulty(int t_value);
 
 private:
 	static const int ENEMY_BASIC_RADIUS = 24;

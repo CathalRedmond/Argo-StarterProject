@@ -17,7 +17,7 @@ Game::Game() :
 	m_mainMenuScreen{ m_eventManager, m_commandSystem, m_inputSystem, m_renderSystem },
 	m_achievementsScreen{ m_eventManager, m_commandSystem, m_inputSystem, m_renderSystem }, 
 #ifdef _DEBUG
-	m_currentScreen{ MenuStates::Splash }
+	m_currentScreen{ MenuStates::Game }
 #else
 	m_currentScreen{ MenuStates::Splash }
 #endif // _DEBUG
@@ -386,7 +386,7 @@ void Game::resetScreen()
 	switch (m_currentScreen)
 	{
 	case MenuStates::Game:
-		m_gameScreen.reset(m_renderer, m_controllers);
+		m_gameScreen.reset(m_renderer, m_controllers, m_controllerButtonMaps);
 		break;
 	case MenuStates::MainMenu:
 		m_mainMenuScreen.reset();

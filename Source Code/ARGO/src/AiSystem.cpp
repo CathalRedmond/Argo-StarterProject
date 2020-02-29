@@ -237,6 +237,7 @@ void AiSystem::setClosestPickupData(glm::vec2 t_botPosition)
 					break;
 				case PickupType::MachineGun:
 				case PickupType::Grenade:
+				case PickupType::Shotgun:
 					if (newDistance < m_botPickupData.distance)
 					{
 						m_botPickupData.distance = newDistance;
