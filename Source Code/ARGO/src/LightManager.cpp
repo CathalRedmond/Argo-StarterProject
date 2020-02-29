@@ -54,7 +54,21 @@ void LightManager::nextAvailableLight()
 	}
 }
 
+void LightManager::nextAvailablePermanentLight()
+{
+	m_currentPermanentEmitter++;
+	if (m_currentPermanentEmitter == Utilities::LIGHT_PERMANENT_POOL)
+	{
+		m_currentPermanentEmitter = 0;
+	}
+}
+
 Entity(&LightManager::getLights())[Utilities::LIGHT_MAX_POOL]
 {
 	return m_lightEmitter;
+}
+
+Entity(&LightManager::getPermanentLights())[Utilities::LIGHT_PERMANENT_POOL]
+{
+	return m_permanentLight;
 }

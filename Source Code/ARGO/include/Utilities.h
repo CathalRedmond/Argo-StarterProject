@@ -95,6 +95,7 @@ namespace Utilities
 
 	//Light Manager
 	const int LIGHT_MAX_POOL = 20;
+	const int LIGHT_PERMANENT_POOL = 5;
 	const int LIGHT_EXPLOSION_LIFETIME = 30;
 
 	//Particles Manager
