@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "AiComponent.h"
 
-AiComponent::AiComponent(AITypes t_types, AIStates t_states, float t_maxRot, float t_maxSpeed):
+AiComponent::AiComponent(AITypes t_types, AIStates t_states, float t_maxRot, float t_maxSpeed) :
 	Component(ComponentType::Ai),
 	m_maxRotation(t_maxRot),
 	m_maxSpeed(t_maxSpeed),
@@ -9,6 +9,7 @@ AiComponent::AiComponent(AITypes t_types, AIStates t_states, float t_maxRot, flo
 	m_state(t_states),
 	m_isLeader(false)
 {
+	m_seekPosition = glm::vec2(-1, -1);
 }
 
 AiComponent::AiComponent() :
@@ -67,4 +68,14 @@ bool AiComponent::getIsleader()
 void AiComponent::setIsLeaser(bool t_value)
 {
 	m_isLeader = t_value;
+}
+
+void AiComponent::setSeekPos(glm::vec2 t_position)
+{
+	m_seekPosition = t_position;
+}
+
+glm::vec2& AiComponent::getSeekPos()
+{
+	return m_seekPosition;
 }

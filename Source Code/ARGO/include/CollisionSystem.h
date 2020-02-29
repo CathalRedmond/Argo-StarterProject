@@ -42,6 +42,7 @@ private:
 	void playerToEnemy(Entity* t_player, Entity* t_enemy);
 	void playerToEnemyBullet(Entity* t_player, Entity* t_enemyBullet);
 	void playerToWall(Entity* t_player, Entity* t_wall);
+	void playerToWaller(Entity* t_player, Entity* t_waller);
 	void playerToPickUp(Entity* t_player, Entity* t_pickUp);
 	void playerToGoal(Entity* t_player, Entity* t_goal);
 

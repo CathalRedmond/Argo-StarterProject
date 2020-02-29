@@ -50,8 +50,11 @@ void AiSystem::update(Entity& t_entity)
 			playerAI(t_entity);
 			break;
 		case AITypes::eWaller:
-			wallerAi(posComp, aiComp, forceComp);
+		{
+			HealthComponent* healthComp = static_cast<HealthComponent*>(t_entity.getComponent(ComponentType::Health));
+			wallerAi(posComp, aiComp, forceComp, healthComp);
 			break;
+		}
 		default:
 			break;
 		}
@@ -125,14 +128,27 @@ void AiSystem::rangedAI(TransformComponent* t_posComp, AiComponent* t_aiComponen
 	}
 }
 
-void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
+void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, HealthComponent* t_healthComponent)
 {
 	switch (t_aiComponent->getStates())
 	{
 	case AIStates::eSeek:
-		
-		seek(t_posComp, t_aiComponent, t_forceComponent, getRandomFloorTile());
+	{
+		if (t_aiComponent->getSeekPos() == glm::vec2(-1, -1))
+		{
+			glm::vec2 pos = getRandomFloorTile() + glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE) / 2.0f;
+			if (pos != glm::vec2(-1, -1))
+			{
+				t_aiComponent->setSeekPos(pos);
+			}
+			else
+			{
+				t_healthComponent->setHealth(0);
+			}
+		}
+		wallerSeek(t_posComp, t_aiComponent, t_forceComponent, t_aiComponent->getSeekPos(), t_healthComponent);
 		break;
+	}
 	default:
 		break;
 	}
@@ -140,17 +156,34 @@ void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponen
 
 void AiSystem::seek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination)
 {
-	if (glm::distance2(t_destination, t_posComp->getPos()) < std::pow(Utilities::ENEMY_RADIUS / 4.0f, 2))
+	glm::vec2 direction = glm::normalize(t_destination - t_posComp->getPos());
+	t_forceComponent->addForce(direction);
+	t_posComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
+}
+
+void AiSystem::wallerSeek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination, HealthComponent* t_healthComponent)
+{
+#ifdef _DEBUG
+	std::cout << "Distance to destination: " << glm::distance2(t_destination + glm::vec2(Utilities::TILE_SIZE / 2.0f, Utilities::TILE_SIZE / 2.0f), t_posComp->getPos()) << std::endl;
+	std::cout << "Arrive distance: " << std::pow(Utilities::TILE_SIZE, 2) << std::endl;
+#endif // _DEBUG
+
+	if (glm::distance2(t_destination + glm::vec2(Utilities::TILE_SIZE / 2.0f, Utilities::TILE_SIZE / 2.0f), t_posComp->getPos()) < std::pow(Utilities::TILE_SIZE, 2))
 	{
 		Entity* tile = m_levelManager.findAtPosition(t_posComp->getPos());
 		if (tile)
 		{
 			m_levelManager.setToWall(*tile);
+			t_aiComponent->setSeekPos(glm::vec2(-1, -1));
+			t_healthComponent->setHealth(0);
 		}
 	}
-	glm::vec2 direction = glm::normalize(t_destination - t_posComp->getPos());
-	t_forceComponent->addForce(direction);
-	t_posComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
+	else
+	{
+		glm::vec2 direction = glm::normalize(t_destination - t_posComp->getPos());
+		t_forceComponent->addForce(direction);
+		t_posComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
+	}
 }
 
 void AiSystem::playerAI(Entity& t_entity)
@@ -366,9 +399,46 @@ glm::vec2 AiSystem::getRandomFloorTile()
 {
 	Entity* tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
 
-	while (nullptr != tile->getComponent(ComponentType::ColliderAABB))
+	if (nullptr != tile->getComponent(ComponentType::ColliderAABB))
 	{
-		tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
+		//tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
+		TileComponent* tileComp = static_cast<TileComponent*>(tile->getComponent(ComponentType::Tile));
+		if (tileComp->getNeighbours()->bottom && tileComp->getNeighbours()->bottom->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->bottom;
+		}
+		else if (tileComp->getNeighbours()->bottomLeft && !tileComp->getNeighbours()->bottomLeft->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->bottomLeft;
+		}
+		else if (tileComp->getNeighbours()->bottomRight && !tileComp->getNeighbours()->bottomRight->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->bottomRight;
+		}
+		else if (tileComp->getNeighbours()->left && !tileComp->getNeighbours()->left->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->left;
+		}
+		else if (tileComp->getNeighbours()->right && !tileComp->getNeighbours()->right->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->right;
+		}
+		else if (tileComp->getNeighbours()->top && !tileComp->getNeighbours()->top->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->top;
+		}
+		else if (tileComp->getNeighbours()->topLeft && !tileComp->getNeighbours()->topLeft->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->topLeft;
+		}
+		else if (tileComp->getNeighbours()->topRight&& !tileComp->getNeighbours()->topRight->getComponent(ComponentType::ColliderAABB))
+		{
+			tile = tileComp->getNeighbours()->topRight;
+		}
+		else
+		{
+			return glm::vec2(-1, -1);
+		}
 	}
 
 	return static_cast<TransformComponent*>(tile->getComponent(ComponentType::Transform))->getPos();

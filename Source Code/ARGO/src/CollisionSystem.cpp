@@ -193,7 +193,8 @@ void CollisionSystem::handlePlayerCollision(Entity* t_player)
 			playerToWall(t_player, other);
 			break;
 		case Tag::WallerEnemy:
-			playerToWall(t_player, other);
+			playerToWaller(t_player, other);
+			break;
 		case Tag::PickUp:
 			playerToPickUp(t_player, other);
 			break;
@@ -229,7 +230,7 @@ void CollisionSystem::handlePlayerBulletCollision(Entity* t_playerBullet)
 			playerBulletToWall(t_playerBullet, other);
 			break;
 		case Tag::WallerEnemy:
-			playerBulletToWall(t_playerBullet, other);
+			playerBulletToEnemy(t_playerBullet, other);
 			break;
 		default:
 			break;
@@ -515,6 +516,36 @@ void CollisionSystem::playerToWall(Entity* t_player, Entity* t_wall)
 	}
 }
 
+void CollisionSystem::playerToWaller(Entity* t_player, Entity* t_waller)
+{
+	if (t_waller->getComponent(ComponentType::ColliderCircle) && circleToCircleCollision(t_player, t_waller))
+	{
+		int playerRadius = static_cast<ColliderCircleComponent*>(t_player->getComponent(ComponentType::ColliderCircle))->getRadius();
+		TransformComponent* playerPosition = static_cast<TransformComponent*>(t_player->getComponent(ComponentType::Transform));
+		ForceComponent* playerForce = static_cast<ForceComponent*>(t_player->getComponent(ComponentType::Force));
+		HealthComponent* playerHealth = static_cast<HealthComponent*>(t_player->getComponent(ComponentType::Health));
+		InputComponent* playerInput = static_cast<InputComponent*>(t_player->getComponent(ComponentType::Input));
+	
+		if (playerInput)
+		{
+			playerInput->getController().activateRumble(RumbleStrength::Strong, RumbleLength::Short);
+		}
+
+		int enemyRadius = static_cast<ColliderCircleComponent*>(t_waller->getComponent(ComponentType::ColliderCircle))->getRadius();
+		TransformComponent* enemyPosition = static_cast<TransformComponent*>(t_waller->getComponent(ComponentType::Transform));
+		ForceComponent* enemyForce = static_cast<ForceComponent*>(t_waller->getComponent(ComponentType::Force));
+
+		glm::vec2 distanceBetween = glm::normalize(playerPosition->getPos() - enemyPosition->getPos()) * PLAYER_TO_ENEMY_REFECTION_SCALER;
+
+		//if took damage and is alive
+		if (playerHealth->isAlive())
+		{
+			playerForce->addForce(distanceBetween);
+			enemyForce->addForce(-distanceBetween);
+		}
+	}
+}
+
 void CollisionSystem::playerToPickUp(Entity* t_player, Entity* t_pickUp)
 {
 	if (t_pickUp->getComponent(ComponentType::ColliderCircle) && circleToCircleCollision(t_player, t_pickUp))
@@ -549,10 +580,8 @@ void CollisionSystem::playerToPickUp(Entity* t_player, Entity* t_pickUp)
 				break;
 			}
 
-
 		}
 	}
-
 }
 
 void CollisionSystem::playerToGoal(Entity* t_player, Entity* t_goal)

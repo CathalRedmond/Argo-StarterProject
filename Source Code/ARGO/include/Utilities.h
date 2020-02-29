@@ -29,6 +29,9 @@ namespace Utilities
 	const std::string FONTS_PATH = "assets\\fonts\\";
 	const std::string FILES_PATH = "assets\\files\\";
 
+	const std::string WALL_SPRITE = "wallSmall.png";
+	const std::string FLOOR_SPRITE = "floor_1b.png";
+
 
 #ifdef _DEBUG
 	const int SCREEN_WIDTH = 1600;

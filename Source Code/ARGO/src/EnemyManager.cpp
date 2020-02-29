@@ -41,6 +41,7 @@ void EnemyManager::update(float t_dt)
 		std::cout << m_difficultyLevel << std::endl;
 	}
 	spawnGroup(t_dt);
+	spawnWaller(t_dt);
 	for (auto& enemy : m_enemies)
 	{
 		HealthComponent* hpComp = static_cast<HealthComponent*>(enemy.getComponent(ComponentType::Health));
@@ -85,8 +86,8 @@ void EnemyManager::spawnGroup(float t_dt)
 		{
 			int x = glm::linearRand(-5, 5);
 			int y = glm::linearRand(-5, 5);
-			x += x > 0 ? 16 : -16;
-			y += y > 0 ? 10 : -10;
+			x += x > 0 ? 12 : -12;
+			y += y > 0 ? 8 : -8;
 			spawnTile = m_levelManager.findAtPosition(glm::vec2(x * Utilities::TILE_SIZE, y * Utilities::TILE_SIZE) + m_renderSystem.getFocus());
 			if (spawnTile)
 			{
@@ -124,6 +125,34 @@ void EnemyManager::spawnGroup(float t_dt)
 	}
 }
 
+void EnemyManager::spawnWaller(float t_dt)
+{
+	m_spawnWallerTimer -= t_dt;
+	if (m_spawnWallerTimer <= 0)
+	{
+		float nextSpawn = SPAWN_ENEMY_RATE / 2.0f;
+		if (m_difficultyLevel > 4)
+		{
+			nextSpawn -= (m_difficultyLevel + 4) * 60;
+			if (nextSpawn < 60) nextSpawn = 60;
+		}
+
+		m_spawnWallerTimer = nextSpawn;
+		Entity* spawnTile = nullptr;
+
+		int x = glm::linearRand(0, 5);
+		int y = glm::linearRand(-5, 5);
+		x += x > 0 ? 12 : -12;
+		y += y > 0 ? 8 : -8;
+		spawnTile = m_levelManager.findAtPosition(glm::vec2(x * Utilities::TILE_SIZE, y * Utilities::TILE_SIZE) + m_renderSystem.getFocus());
+
+		if (spawnTile)
+		{
+			createWallerAtTile(spawnTile);
+		}
+	}
+}
+
 void EnemyManager::createEnemyAtTile(Entity* t_tile)
 {
 	if (t_tile)
@@ -148,6 +177,39 @@ void EnemyManager::createEnemyAtTile(Entity* t_tile)
 			if (m_nextEnemy >= Utilities::ENEMY_POOL_SIZE)
 			{
 				m_nextEnemy = 0;
+			}
+		}
+	}
+}
+
+void EnemyManager::createWallerAtTile(Entity* t_tile)
+{
+	if (t_tile)
+	{
+		TransformComponent* tileTransform = static_cast<TransformComponent*>(t_tile->getComponent(ComponentType::Transform));
+		HealthComponent* healthComp = static_cast<HealthComponent*> (m_wallers[m_nextWaller].getComponent(ComponentType::Health));
+		TransformComponent* transformComp = static_cast<TransformComponent*> (m_wallers[m_nextWaller].getComponent(ComponentType::Transform));
+		ForceComponent* forceComp = static_cast<ForceComponent*> (m_wallers[m_nextWaller].getComponent(ComponentType::Force));
+		AiComponent* aiComp = static_cast<AiComponent*> (m_wallers[m_nextWaller].getComponent(ComponentType::Ai));
+
+		if (healthComp && !healthComp->isAlive() && transformComp && forceComp && aiComp && tileTransform)
+		{
+#ifdef _DEBUG
+			std::cout << "Spawned on position " << (tileTransform->getPos().x + Utilities::TILE_SIZE) << ", " << (tileTransform->getPos().y + Utilities::TILE_SIZE) << std::endl;
+#endif // _DEBUG
+
+			healthComp->resetHealth();
+			transformComp->setPos(tileTransform->getPos() + glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE));
+			transformComp->setRotation(0);
+			forceComp->setForce(glm::vec2(0, 0));
+			aiComp->setType(AITypes::eWaller);
+			aiComp->setState(AIStates::eSeek);
+			aiComp->setSeekPos(glm::vec2(-1, -1));
+
+			m_nextWaller++;
+			if (m_nextWaller >= Utilities::WALLERS_POOL_SIZE)
+			{
+				m_nextWaller = 0;
 			}
 		}
 	}
@@ -186,6 +248,14 @@ void EnemyManager::render(SDL_Renderer* t_renderer)
 		if (hpComp && hpComp->isAlive())
 		{
 			m_renderSystem.render(t_renderer, enemy);
+		}
+	}
+	for (auto& waller : m_wallers)
+	{
+		HealthComponent* hpComp = static_cast<HealthComponent*>(waller.getComponent(ComponentType::Health));
+		if (hpComp && hpComp->isAlive())
+		{
+			m_renderSystem.render(t_renderer, waller);
 		}
 	}
 }
