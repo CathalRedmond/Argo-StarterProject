@@ -263,7 +263,7 @@ void GameScreen::updatePlayerColour(const UpdatePlayerColour& t_event)
 {
 	VisualComponent* visComp = static_cast<VisualComponent*>(m_players[t_event.playerIndex].getComponent(ComponentType::Visual));
 	visComp->setColor(t_event.colour.x, t_event.colour.y, t_event.colour.z);
-}
+} 
 
 void GameScreen::preRender()
 {
