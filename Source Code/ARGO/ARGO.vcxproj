@@ -102,6 +102,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\Controller.cpp" />
+    <ClCompile Include="src\WeaponCycleDownCommand.cpp" />
+    <ClCompile Include="src\WeaponCycleUpCommand.cpp" />
     <ClCompile Include="src\WeaponSystem.cpp" />
     <ClCompile Include="src\WeaponComponent.cpp" />
   </ItemGroup>
@@ -176,6 +178,8 @@
     <ClInclude Include="include\TextComponent.h" />
     <ClInclude Include="include\ThrowGlowstickCommand.h" />
     <ClInclude Include="include\Utilities.h" />
+    <ClInclude Include="include\WeaponCycleDownCommand.h" />
+    <ClInclude Include="include\WeaponCycleUpCommand.h" />
     <ClInclude Include="include\WeaponSystem.h" />
     <ClInclude Include="include\WeaponComponent.h" />
   </ItemGroup>

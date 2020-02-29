@@ -168,10 +168,11 @@ public:
 	{
 		WeaponComponent* weapon = static_cast<WeaponComponent*>(t_entity.getComponent(ComponentType::Weapon));
 		float ammoScaler = 1;
-		if (weapon->getMaxAmmo() != 0)
+		Weapon currentWeapon = weapon->getCurrent();
+		if (weapon->getMaxAmmo(currentWeapon) != 0)
 		{
 			//inverting the scaler by taking it away from 1.
-			ammoScaler = 1 - (weapon->getAmmo() / weapon->getMaxAmmo());
+			ammoScaler = 1 - (weapon->getAmmo(currentWeapon) / weapon->getMaxAmmo(currentWeapon));
 		}
 		//inverting the scaler by taking it away from 1.
 		return (1 - m_data->distance / (CAN_SEE_ENEMY_DISTANCE * CAN_SEE_ENEMY_DISTANCE)) * ammoScaler * COLLECT_PICKUP_SCALER;

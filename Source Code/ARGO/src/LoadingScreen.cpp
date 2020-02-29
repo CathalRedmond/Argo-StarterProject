@@ -47,10 +47,13 @@ void LoadingScreen::initialise(SDL_Renderer* t_renderer)
 	VisualComponent* visComp = static_cast<VisualComponent*>(m_background.getComponent(ComponentType::Visual));
 	visComp->setStaticPosition(true);
 	m_background.addComponent(new TransformComponent(0, 0));
+	static_cast<TransformComponent*>(m_background.getComponent(ComponentType::Transform))->setAlwaysOnScreen(true);
 
 
 	m_loadingText.addComponent(new TextComponent("ariblk.ttf", t_renderer, Utilities::MEDIUM_FONT, true, m_loadingString, 255, 255, 0));
  	TextComponent* textComp = static_cast<TextComponent*>(m_loadingText.getComponent(ComponentType::Text));
 	glm::vec2 textSize = glm::vec2(textComp->getWidth(), textComp->getHeight());
 	m_loadingText.addComponent(new TransformComponent(glm::vec2(Utilities::SCREEN_WIDTH / 2.0f - textSize.x / 2.0f, Utilities::SCREEN_HEIGHT / 2.0f - textSize.y / 2.0f)));
+	static_cast<TransformComponent*>(m_loadingText.getComponent(ComponentType::Transform))->setAlwaysOnScreen(true);
+
  }

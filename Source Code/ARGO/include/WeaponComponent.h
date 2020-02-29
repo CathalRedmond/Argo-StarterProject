@@ -18,17 +18,18 @@ public:
 	bool fireGun();
 	bool throwGlowStick();
 	Weapon getCurrent();
-	int getMaxAmmo();
-	int getAmmo();
+	int getMaxAmmo(Weapon t_ammoType);
+	int getAmmo(Weapon t_ammoType);
 	void setCurrent(Weapon t_weapon);
 	void fillAmmo(Weapon t_type);
-
+	void cycleCurrentWeapon(bool t_isUp);
 
 private:
 	float m_gunCooldown;
 	float m_glowStickCooldown;
 	Weapon m_currentWeapon;
-	int m_ammo;
+	static const int S_NUMBER_OF_WEAPONS = 4;
+	int m_ammo[S_NUMBER_OF_WEAPONS];
 
 	const float GLOWSTICK_COOLDOWN = 120;
 	const float PISTOL_COOLDOWN = 20;

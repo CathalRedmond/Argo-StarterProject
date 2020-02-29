@@ -357,6 +357,12 @@
     <ClCompile Include="src\LoadingScreen.cpp">
       <Filter>Source Files\Screens</Filter>
     </ClCompile>
+    <ClCompile Include="src\WeaponCycleDownCommand.cpp">
+      <Filter>Source Files\CommandPattern\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="src\WeaponCycleUpCommand.cpp">
+      <Filter>Source Files\CommandPattern\Commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\stdafx.h">
@@ -658,6 +664,12 @@
     </ClInclude>
     <ClInclude Include="include\LightManager.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\WeaponCycleUpCommand.h">
+      <Filter>Header Files\CommandPattern\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="include\WeaponCycleDownCommand.h">
+      <Filter>Header Files\CommandPattern\Commands</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
