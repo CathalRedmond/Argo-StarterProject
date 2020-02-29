@@ -386,7 +386,7 @@ void Game::resetScreen()
 	switch (m_currentScreen)
 	{
 	case MenuStates::Game:
-		m_gameScreen.reset(m_renderer, m_controllers);
+		m_gameScreen.reset(m_renderer, m_controllers, m_controllerButtonMaps);
 		break;
 	case MenuStates::MainMenu:
 		m_mainMenuScreen.reset();

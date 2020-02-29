@@ -283,9 +283,10 @@ void GameScreen::preRender()
 	m_renderSystem.setFocus(focusPoint / numberOfPoints);
 }
 
-void GameScreen::reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS])
+void GameScreen::reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS], ButtonCommandMap t_controllerButtonMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS] )
 {
 	m_gameOver = false;
+	setControllerButtonMap(t_controllerButtonMaps);
 	for (int index = 0; index < Utilities::S_MAX_PLAYERS; index++)
 	{
 		m_controllers[index] = t_controller[index];
