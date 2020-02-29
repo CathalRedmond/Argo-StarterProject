@@ -38,8 +38,8 @@ void HUDManager::update()
 		TextComponent* textComp = static_cast<TextComponent*>(hudElement.HUDAmmoText.getComponent(ComponentType::Text));
 		//Get the Ammo Componentn Here and do the changes needed to set the correct size of the bar.
 		WeaponComponent* weaponComp = static_cast<WeaponComponent*>(m_players[hudComp->getIndex()].getComponent(ComponentType::Weapon));
-		int ammo = weaponComp->getAmmo();
-		int maxAmmo = weaponComp->getMaxAmmo();
+		int ammo = weaponComp->getAmmo(weaponComp->getCurrent());
+		int maxAmmo = weaponComp->getMaxAmmo(weaponComp->getCurrent());
 		float ammoScaler = 1.0f;
 		if (maxAmmo != 0)
 		{
