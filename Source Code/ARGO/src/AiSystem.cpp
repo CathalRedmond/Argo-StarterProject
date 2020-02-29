@@ -394,7 +394,7 @@ glm::vec2 AiSystem::getRandomFloorTile()
 {
 	Entity* tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
 
-	if (nullptr != tile->getComponent(ComponentType::ColliderAABB))
+	if (tile && nullptr != tile->getComponent(ComponentType::ColliderAABB))
 	{
 		//tile = m_levelManager.findAtPosition(glm::vec2(glm::linearRand(0, Utilities::LEVEL_TILE_WIDTH * Utilities::TILE_SIZE), glm::linearRand(0, Utilities::LEVEL_TILE_HEIGHT * Utilities::TILE_SIZE)));
 		TileComponent* tileComp = static_cast<TileComponent*>(tile->getComponent(ComponentType::Tile));
@@ -434,6 +434,10 @@ glm::vec2 AiSystem::getRandomFloorTile()
 		{
 			return glm::vec2(-1, -1);
 		}
+	}
+	else
+	{
+		return glm::vec2(-1, -1);
 	}
 
 	return static_cast<TransformComponent*>(tile->getComponent(ComponentType::Transform))->getPos();

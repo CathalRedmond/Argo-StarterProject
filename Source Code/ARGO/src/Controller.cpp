@@ -54,7 +54,10 @@ void Controller::initialiseController()
 
 	if (m_controller == NULL)
 	{
+#ifdef _DEBUG
 		std::cout << "Couldn't Open Game Controller" << std::endl;;
+
+#endif // _DEBUG
 	}
 	else
 	{

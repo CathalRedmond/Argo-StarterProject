@@ -38,7 +38,10 @@ void EnemyManager::update(float t_dt)
 	{
 		m_difficultyTimer = 0;
 		m_difficultyLevel++;
+#ifdef _DEBUG
 		std::cout << m_difficultyLevel << std::endl;
+#endif // _DEBUG
+
 	}
 	spawnGroup(t_dt);
 	spawnWaller(t_dt);
@@ -130,7 +133,7 @@ void EnemyManager::spawnWaller(float t_dt)
 	m_spawnWallerTimer -= t_dt;
 	if (m_spawnWallerTimer <= 0)
 	{
-		float nextSpawn = SPAWN_ENEMY_RATE / 2.0f;
+		float nextSpawn = SPAWN_ENEMY_RATE / 4.0f;
 		if (m_difficultyLevel > 4)
 		{
 			nextSpawn -= (m_difficultyLevel + 4) * 60;
@@ -148,7 +151,25 @@ void EnemyManager::spawnWaller(float t_dt)
 
 		if (spawnTile)
 		{
+			Neighbours* neighbours = static_cast<TileComponent*>(spawnTile->getComponent(ComponentType::Tile))->getNeighbours();
 			createWallerAtTile(spawnTile);
+			createWallerAtTile(neighbours->top);
+			createWallerAtTile(neighbours->left);
+			if (m_difficultyLevel > 1)
+			{
+				createWallerAtTile(neighbours->right);
+				createWallerAtTile(neighbours->bottom);
+			}
+			if (m_difficultyLevel > 2)
+			{
+				createWallerAtTile(neighbours->topLeft);
+				createWallerAtTile(neighbours->topRight);
+			}
+			if (m_difficultyLevel > 3)
+			{
+				createWallerAtTile(neighbours->bottomLeft);
+				createWallerAtTile(neighbours->bottomRight);
+			}
 		}
 	}
 }

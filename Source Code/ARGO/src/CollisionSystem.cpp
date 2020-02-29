@@ -596,6 +596,9 @@ void CollisionSystem::playerBulletToEnemy(Entity* t_playerBullet, Entity* t_enem
 {
 	if (t_enemy->getComponent(ComponentType::ColliderCircle) && circleToCircleCollision(t_playerBullet, t_enemy))
 	{
+#ifdef _DEBUG
+		std::cout << "Waller shot!" << std::endl;
+#endif // _DEBUG
 		static_cast<HealthComponent*>(t_playerBullet->getComponent(ComponentType::Health))->setHealth(0); //kill the bullet
 		static_cast<HealthComponent*>(t_enemy->getComponent(ComponentType::Health))->reduceHealth(1);
 		if (!static_cast<HealthComponent*>(t_enemy->getComponent(ComponentType::Health))->isAlive())
