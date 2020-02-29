@@ -44,7 +44,14 @@ void HUDManager::update()
 			ammoScaler = (float)ammo / (float)maxAmmo;
 		}
 		//This is a stand in until Emmett is done that.
-		textComp->setText(std::to_string(ammo) + " / " + std::to_string(maxAmmo));
+		//if (ammo == 0 && maxAmmo == 0)
+		//{
+		//	textComp->setText();
+		//}
+		//else
+		//{
+			textComp->setText(std::to_string(ammo) + " / " + std::to_string(maxAmmo));
+		//}
 		hudComp->setCurrentAmmoSize(hudComp->getMaxAmmoSize().x * ammoScaler);
 		static_cast<PrimitiveComponent*>(hudElement.HUDAmmoBar.getComponent(ComponentType::Primitive))->setSize(hudComp->getCurrentAmmoSize());
 
