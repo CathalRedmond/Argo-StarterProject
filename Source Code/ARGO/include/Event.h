@@ -85,7 +85,13 @@ struct GoalHit
 
 struct GameOver
 {
+	bool isGameLost;
+};
 
+struct UpdatePlayerColour
+{
+	glm::vec3 colour;
+	int playerIndex;
 };
 
 struct LoadGame
@@ -94,6 +100,12 @@ struct LoadGame
 
 struct UpdateLoading
 {
+};
+
+struct WeaponCycle
+{
+	bool isCycleUp;
+	Entity& player;
 };
 
 class BaseEvent

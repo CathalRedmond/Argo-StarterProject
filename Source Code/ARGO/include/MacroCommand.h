@@ -19,6 +19,8 @@
 #include "GoToMainMenuCommand.h"
 #include "ThrowGlowstickCommand.h"
 #include "GoToGameScreenCommand.h"
+#include "WeaponCycleDownCommand.h"
+#include "WeaponCycleUpCommand.h"
  
 class MacroCommand
 {

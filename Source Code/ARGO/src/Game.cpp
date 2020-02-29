@@ -322,9 +322,11 @@ void Game::createButtonMaps()
 			ButtonCommandPair(ButtonType::DpadDown, new MoveDownCommand()),
 			ButtonCommandPair(ButtonType::DpadLeft, new MoveLeftCommand()),
 			ButtonCommandPair(ButtonType::DpadRight, new MoveRightCommand()),
-			ButtonCommandPair(ButtonType::Back, new CloseWindowCommand()),
+			ButtonCommandPair(ButtonType::Back, new GoToMainMenuCommand()),
 			ButtonCommandPair(ButtonType::RightTrigger, new FireBulletCommand()),
-			ButtonCommandPair(ButtonType::LB, new ThrowGlowstickCommand())
+			ButtonCommandPair(ButtonType::LeftTrigger, new ThrowGlowstickCommand()),
+			ButtonCommandPair(ButtonType::RB, new WeaponCycleUpCommand()),
+			ButtonCommandPair(ButtonType::LB, new WeaponCycleDownCommand()),
 		};
 		// Set Held To Same as Pressed Commands For Time Being
 		m_controllerButtonMaps[static_cast<int>(ButtonState::Held)][index] =
@@ -333,7 +335,7 @@ void Game::createButtonMaps()
 			ButtonCommandPair(ButtonType::DpadDown, new MoveDownCommand()),
 			ButtonCommandPair(ButtonType::DpadLeft, new MoveLeftCommand()),
 			ButtonCommandPair(ButtonType::DpadRight, new MoveRightCommand()),
-			ButtonCommandPair(ButtonType::Back, new CloseWindowCommand()),
+			ButtonCommandPair(ButtonType::Back, new GoToMainMenuCommand()),
 			ButtonCommandPair(ButtonType::RightTrigger, new FireBulletCommand())
 		};
 		// Set Release Commands to nothing

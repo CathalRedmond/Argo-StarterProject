@@ -23,7 +23,7 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_commandSystem{ t_commandSystem },
 	m_inputSystem{ t_input },
 	m_renderSystem{ t_renderSystem },
-	m_hudManager(m_players),
+	m_hudManager(m_players,m_eventManager),
 	m_particleManager(m_eventManager, m_particleSystem),
 	m_bloodManager(m_particleSystem, m_players),
 	m_lightManager(m_eventManager),
@@ -95,7 +95,7 @@ void GameScreen::processEvents(SDL_Event* t_event)
 		}
 		case SDLK_1:
 		{
-			m_eventManager.emitEvent<GameOver>(GameOver{ });
+			m_eventManager.emitEvent<GameOver>(GameOver{ false});
 			break;
 		}
 		default:
@@ -129,7 +129,14 @@ void GameScreen::render(SDL_Renderer* t_renderer)
 	m_hudManager.render(t_renderer, &m_renderSystem);
 	if (m_gameOver)
 	{
-		m_renderSystem.render(t_renderer, m_gameOverPopup);
+		if (m_isGameLost)
+		{
+			m_renderSystem.render(t_renderer, m_gameLosePopup);
+		}
+		else
+		{
+			m_renderSystem.render(t_renderer, m_gameWinPopup);
+		}
 	}
 
 }
@@ -155,10 +162,18 @@ void GameScreen::createGoal()
 
 void GameScreen::createPopups(SDL_Renderer* t_renderer)
 {
-	m_gameOverPopup.addComponent(new VisualComponent("GameLost_Pop_Up.png", t_renderer));
-	VisualComponent* visualComp = static_cast<VisualComponent*>(m_gameOverPopup.getComponent(ComponentType::Visual));
+	m_gameLosePopup.addComponent(new VisualComponent("GameLost_Pop_Up.png", t_renderer));
+	VisualComponent* visualComp = static_cast<VisualComponent*>(m_gameLosePopup.getComponent(ComponentType::Visual));
 	visualComp->setStaticPosition(true);
-	m_gameOverPopup.addComponent(new TransformComponent(glm::vec2(Utilities::SCREEN_WIDTH / 2.0f - visualComp->getWidth() / 2.0f, Utilities::SCREEN_HEIGHT / 2.0f - visualComp->getHeight() / 2.0f)));
+	m_gameLosePopup.addComponent(new TransformComponent(glm::vec2(Utilities::SCREEN_WIDTH / 2.0f - visualComp->getWidth() / 2.0f, Utilities::SCREEN_HEIGHT / 2.0f - visualComp->getHeight() / 2.0f)));
+	static_cast<TransformComponent*>(m_gameLosePopup.getComponent(ComponentType::Transform))->setAlwaysOnScreen(true);
+
+	m_gameWinPopup.addComponent(new VisualComponent("GameWon_Pop_Up.png", t_renderer));
+	visualComp = static_cast<VisualComponent*>(m_gameWinPopup.getComponent(ComponentType::Visual));
+	visualComp->setStaticPosition(true);
+	m_gameWinPopup.addComponent(new TransformComponent(glm::vec2(Utilities::SCREEN_WIDTH / 2.0f - visualComp->getWidth() / 2.0f, Utilities::SCREEN_HEIGHT / 2.0f - visualComp->getHeight() / 2.0f)));
+	static_cast<TransformComponent*>(m_gameWinPopup.getComponent(ComponentType::Transform))->setAlwaysOnScreen(true);
+
 }
 
 void GameScreen::setUpLevel()
@@ -287,6 +302,7 @@ void GameScreen::newLevel()
 {
 	if (m_currentLevel > MAX_LEVEL)
 	{
+		m_eventManager.emitEvent<UpdateAchievement>(UpdateAchievement{ 0, 1 });
 		m_eventManager.emitEvent<ChangeScreen>(ChangeScreen{ MenuStates::MainMenu });
 	}
 	else
@@ -328,7 +344,7 @@ void GameScreen::updatePlayers(float t_deltaTime)
 		!static_cast<HealthComponent*>(m_players[2].getComponent(ComponentType::Health))->isAlive() &&
 		!static_cast<HealthComponent*>(m_players[3].getComponent(ComponentType::Health))->isAlive())
 	{
-		m_eventManager.emitEvent<GameOver>(GameOver{ });
+		m_eventManager.emitEvent<GameOver>(GameOver{true });
 	}
 	for (Entity& player : m_players)
 	{
@@ -377,6 +393,7 @@ void GameScreen::setControllerButtonMap(ButtonCommandMap t_controllerMaps[Utilit
 void GameScreen::gameOver(const GameOver& t_event)
 {
 	m_gameOver = true;
+	m_isGameLost = t_event.isGameLost;
 	using ButtonCommandPair = std::pair<ButtonType, Command*>;
 	for (int index = 0; index < Utilities::S_MAX_PLAYERS; index++)
 	{
@@ -384,7 +401,8 @@ void GameScreen::gameOver(const GameOver& t_event)
 		{
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Pressed)][index] =
 			{
-				ButtonCommandPair(ButtonType::B, new GoToMainMenuCommand())
+				ButtonCommandPair(ButtonType::B, new GoToMainMenuCommand()),
+				ButtonCommandPair(ButtonType::Back, new GoToMainMenuCommand())
 			};
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Held)][index] = ButtonCommandMap();
 			m_controllerButtonMaps[static_cast<int>(ButtonState::Released)][index] = ButtonCommandMap();
@@ -395,6 +413,18 @@ void GameScreen::gameOver(const GameOver& t_event)
 		}
 	}
 }
+
+void GameScreen::updatePlayerColour(const UpdatePlayerColour& t_event)
+{
+	VisualComponent* visComp = static_cast<VisualComponent*>(m_players[t_event.playerIndex].getComponent(ComponentType::Visual));
+	visComp->setColor(t_event.colour.x, t_event.colour.y, t_event.colour.z);
+}
+
+void GameScreen::cycleWeapons(const WeaponCycle& t_event)
+{
+	static_cast<WeaponComponent*>(t_event.player.getComponent(ComponentType::Weapon))->cycleCurrentWeapon(t_event.isCycleUp);
+}
+
 
 void GameScreen::preRender()
 {
@@ -479,6 +509,9 @@ void GameScreen::initialise(SDL_Renderer* t_renderer, ButtonCommandMap t_control
 	m_projectileManager.init();
 	m_pickUpManager.init(m_renderer);
 	m_hudManager.init(t_renderer);
-	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));
+	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));	
+	m_eventManager.subscribeToEvent<UpdatePlayerColour>(std::bind(&GameScreen::updatePlayerColour, this, std::placeholders::_1));
+	m_eventManager.subscribeToEvent<WeaponCycle>(std::bind(&GameScreen::cycleWeapons, this, std::placeholders::_1));
 
-} 
+
+}
