@@ -20,6 +20,18 @@
 #include "BloodManager.h"
 #include <WeaponSystem.h>
 
+struct levelData
+{
+	glm::vec2 goalPos;
+	float goalChargeTime;
+};
+
+enum class GoalState
+{
+	Inactive,
+	Charging,
+	Charged
+};
 
 class GameScreen
 {
@@ -39,7 +51,15 @@ public:
 	void createGoal();
 	void createPopups(SDL_Renderer* t_renderer);
 	void setUpLevel();
+	void createLevel1();
+	void createLevel2();
+	void createLevel3();
+	void setupGoal();
+	void updateGoalText();
+	void newLevel();
+	void activateGoal(const GoalHit& t_event);
 	void preRender();
+	void updateGoal(float t_deltaTime);
 	void updatePlayers(float t_deltaTime);
 	void updateEntities(float t_deltaTime);
 	void updateProjectiles(float t_deltaTime);
@@ -51,13 +71,17 @@ public:
 	Entity m_gameOverPopup;
 
 	EventManager& m_eventManager;
-
-	static const int MAX_ENTITIES = 10000;
+	SDL_Renderer* m_renderer;
 
 	Controller m_controllers[Utilities::S_MAX_PLAYERS];
 	Entity m_players[Utilities::S_MAX_PLAYERS];
 	Entity m_goal;
-	SDL_Renderer* m_renderer;
+	float m_goalCurrentCharge;
+	bool m_goalIsCharging;
+	GoalState m_goalState;
+	levelData m_levelData[3];
+	int m_currentLevel;
+
 
 	// Systems
 	HealthSystem m_healthSystem;
@@ -70,7 +94,6 @@ public:
 	CommandSystem& m_commandSystem;
 	InputSystem& m_inputSystem;
 	RenderSystem& m_renderSystem;
-
 
 	ProjectileManager m_projectileManager;
 	LevelManager m_levelManager;
@@ -89,4 +112,5 @@ public:
 
 	bool m_gameOver;
 
+	const int MAX_LEVEL = 2;
 };
