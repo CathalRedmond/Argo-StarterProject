@@ -10,7 +10,7 @@ bool cleanUpEnemies(const Entity& t_entity)
 GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, Controller t_controllers[Utilities::S_MAX_PLAYERS], CommandSystem& t_commandSystem, InputSystem& t_input, RenderSystem& t_renderSystem) :
 	m_eventManager{ t_eventManager },
 	m_controllers{ *t_controllers },
-	m_levelManager{ t_renderer, m_players, m_renderSystem, m_projectileManager, t_eventManager },
+	m_levelManager{ t_renderer, m_players, m_renderSystem, m_projectileManager, m_lightManager, t_eventManager },
 	m_enemyManager{ t_renderer, Utilities::ENEMY_INITIAL_SPAWN_DELAY, t_eventManager, m_transformSystem, m_collisionSystem, m_healthSystem, m_aiSystem, m_renderSystem, m_levelManager },
 	m_renderer{ t_renderer },
 	m_transformSystem{ m_eventManager },
@@ -24,8 +24,23 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_inputSystem{ t_input },
 	m_renderSystem{ t_renderSystem },
 	m_hudManager(m_players),
-	m_particleManager(m_eventManager, m_particleSystem)
+	m_particleManager(m_eventManager, m_particleSystem),
+	m_bloodManager(m_particleSystem, m_players),
+	m_lightManager(m_eventManager),
+	m_currentLevel(0),
+	m_gameOver(false),
+	m_goalCurrentCharge(0),
+	m_goalIsCharging(false),
+	m_goalState(GoalState::Inactive)
 {
+	t_eventManager.subscribeToEvent<GoalHit>(std::bind(&GameScreen::activateGoal, this, std::placeholders::_1));
+
+	m_levelData[0].goalPos = glm::vec2(51, 36) * (float)Utilities::TILE_SIZE;
+	m_levelData[0].goalChargeTime = 1200;
+	m_levelData[1].goalPos = glm::vec2(55, 10) * (float)Utilities::TILE_SIZE;
+	m_levelData[1].goalChargeTime = 3000;
+	m_levelData[2].goalPos = glm::vec2(30, 20) * (float)Utilities::TILE_SIZE;
+	m_levelData[2].goalChargeTime = 6000;
 }
 
 GameScreen::~GameScreen()
@@ -37,6 +52,7 @@ void GameScreen::update(float t_deltaTime)
 	updatePlayers(t_deltaTime);
 	if (!m_gameOver)
 	{
+		updateGoal(t_deltaTime);
 		updateLevelManager();
 		updateEntities(t_deltaTime);
 		updateProjectiles(t_deltaTime);
@@ -45,6 +61,8 @@ void GameScreen::update(float t_deltaTime)
 		m_pickUpManager.update(t_deltaTime);
 		m_hudManager.update();
 		m_particleManager.update(t_deltaTime);
+		m_bloodManager.update(t_deltaTime);
+		m_lightManager.update(t_deltaTime);
 	}
 }
 
@@ -95,6 +113,7 @@ void GameScreen::render(SDL_Renderer* t_renderer)
 	preRender();
 	m_levelManager.render(t_renderer, &m_renderSystem);
 	m_enemyManager.render(t_renderer);
+	m_bloodManager.render(t_renderer, &m_renderSystem);
 	for (Entity& player : m_players)
 	{
 		if (static_cast<HealthComponent*>(player.getComponent(ComponentType::Health))->isAlive())
@@ -127,10 +146,11 @@ void GameScreen::createPlayer(Entity& t_player, int t_index, SDL_Renderer* t_ren
 
 void GameScreen::createGoal()
 {
-	m_goal.addComponent(new TransformComponent(Utilities::GOAL_START_POSITION));
+	m_goal.addComponent(new TransformComponent());
 	m_goal.addComponent(new ColliderCircleComponent(32));
 	m_goal.addComponent(new TagComponent(Tag::Goal));
 	m_goal.addComponent(new VisualComponent("EscapePod.png", m_renderer));
+	m_goal.addComponent(new TextComponent("ordinary.ttf", m_renderer, 24, false, ""));
 }
 
 void GameScreen::createPopups(SDL_Renderer* t_renderer)
@@ -143,7 +163,28 @@ void GameScreen::createPopups(SDL_Renderer* t_renderer)
 
 void GameScreen::setUpLevel()
 {
+	setupGoal();
+
 	m_levelManager.setupLevel();
+
+	switch (m_currentLevel)
+	{
+	case 0:
+		createLevel1();
+		break;
+	case 1:
+		createLevel2();
+		break;
+	case 2:
+		createLevel3();
+		break;
+	default:
+		break;
+	}
+}
+
+void GameScreen::createLevel1()
+{
 	//Creates a room at a given position with a given width and height
 	m_levelManager.createRoom(glm::vec2(1, 1), 12, 12);
 	m_levelManager.createRoom(glm::vec2(13, 2), 2, 2);
@@ -179,6 +220,105 @@ void GameScreen::setUpLevel()
 	m_levelManager.createRoom(glm::vec2(54, 32), 2, 2);
 	m_levelManager.createRoom(glm::vec2(41, 34), 17, 4);
 	m_levelManager.createRoom(glm::vec2(41, 31), 7, 3);
+}
+
+void GameScreen::createLevel2()
+{
+	m_levelManager.createRoom(glm::vec2(1, 1), 20, 12);
+	m_levelManager.createRoom(glm::vec2(21, 1), 25, 7);
+	m_levelManager.createRoom(glm::vec2(49, 1), 10, 15);
+	m_levelManager.createRoom(glm::vec2(1, 14), 8, 20);
+	m_levelManager.createRoom(glm::vec2(9, 30), 8, 9);
+	m_levelManager.createRoom(glm::vec2(10, 14), 20, 9);
+	m_levelManager.createRoom(glm::vec2(10, 23), 10, 6);
+	m_levelManager.createRoom(glm::vec2(21, 24), 8, 15);
+	m_levelManager.createRoom(glm::vec2(30, 8), 8, 20);
+	m_levelManager.createRoom(glm::vec2(29, 31), 30, 8);
+	m_levelManager.createRoom(glm::vec2(38, 21), 15, 10);
+	m_levelManager.createRoom(glm::vec2(40, 9), 5, 13);
+}
+
+void GameScreen::createLevel3()
+{
+	m_levelManager.createRoom(glm::vec2(1, 1), 58, 8);
+	m_levelManager.createRoom(glm::vec2(51, 9), 8, 30);
+	m_levelManager.createRoom(glm::vec2(1, 9), 8, 30);
+	m_levelManager.createRoom(glm::vec2(1, 31), 58, 8);
+	m_levelManager.createRoom(glm::vec2(28, 9), 4, 1);
+	m_levelManager.createRoom(glm::vec2(28, 30), 4, 1);
+	m_levelManager.createRoom(glm::vec2(9, 18), 1, 4);
+	m_levelManager.createRoom(glm::vec2(50, 18), 1, 4);
+
+	m_levelManager.createRoom(glm::vec2(10, 10), 40, 20);
+}
+
+void GameScreen::setupGoal()
+{
+	m_gameOver = false;
+	m_goalCurrentCharge = 0;
+	m_goalIsCharging = false;
+	m_goalState = GoalState::Inactive;
+	static_cast<TransformComponent*>(m_goal.getComponent(ComponentType::Transform))->setPos(m_levelData[m_currentLevel].goalPos);
+}
+
+void GameScreen::updateGoalText()
+{
+	TextComponent* comp = static_cast<TextComponent*>(m_goal.getComponent(ComponentType::Text));
+	switch (m_goalState)
+	{
+	case GoalState::Inactive:
+		comp->setText("INACTIVE");
+		comp->setColor(255, 0, 0);
+		break;
+	case GoalState::Charging:
+		comp->setText("CHARGING:" + std::to_string((int)(m_goalCurrentCharge / m_levelData[m_currentLevel].goalChargeTime * 100)) + "%");
+		comp->setColor(255, 150, 50);
+		break;
+	case GoalState::Charged:
+		comp->setText("CHARGED");
+		comp->setColor(0, 255, 0);
+		break;
+	default:
+		break;
+	}
+}
+
+void GameScreen::newLevel()
+{
+	if (m_currentLevel > MAX_LEVEL)
+	{
+		m_eventManager.emitEvent<ChangeScreen>(ChangeScreen{ MenuStates::MainMenu });
+	}
+	else
+	{
+		m_gameOver = false;
+		int playerCount = 0;
+		for (Entity& player : m_players)
+		{
+			player.removeAllComponents();
+			createPlayer(player, playerCount, m_renderer);
+			playerCount++;
+		}
+		setUpLevel();
+		m_projectileManager.reset();
+		m_enemyManager.killAll();
+		m_hudManager.reset();
+		m_pickUpManager.reset();
+	}
+}
+
+void GameScreen::activateGoal(const GoalHit& t_event)
+{
+	if (m_goalState == GoalState::Inactive)
+	{
+		m_enemyManager.setDifficulty(666);
+		m_goalState = GoalState::Charging;
+	}
+	if (m_goalState == GoalState::Charged)
+	{
+		m_currentLevel++;
+		newLevel();
+	}
 }
 
 void GameScreen::updatePlayers(float t_deltaTime)
@@ -280,9 +420,24 @@ void GameScreen::preRender()
 	m_renderSystem.setFocus(focusPoint / numberOfPoints);
 }
 
-void GameScreen::reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS])
+void GameScreen::updateGoal(float t_deltaTime)
+{
+	if (m_goalState == GoalState::Charging)
+	{
+		m_goalCurrentCharge += t_deltaTime;
+		if (m_goalCurrentCharge >= m_levelData[m_currentLevel].goalChargeTime)
+		{
+			m_goalState = GoalState::Charged;
+		}
+	}
+	updateGoalText();
+}
+
+void GameScreen::reset(SDL_Renderer* t_renderer, Controller t_controller[Utilities::S_MAX_PLAYERS], ButtonCommandMap t_controllerButtonMaps[Utilities::NUMBER_OF_CONTROLLER_MAPS][Utilities::S_MAX_PLAYERS] )
 {
 	m_gameOver = false;
+	m_currentLevel = 0;
+	setControllerButtonMap(t_controllerButtonMaps);
 	for (int index = 0; index < Utilities::S_MAX_PLAYERS; index++)
 	{
 		m_controllers[index] = t_controller[index];
@@ -318,11 +473,12 @@ void GameScreen::initialise(SDL_Renderer* t_renderer, ButtonCommandMap t_control
 		createPlayer(player, playerCount, t_renderer);
 		playerCount++;
 	}
+	createGoal();
 	m_enemyManager.init();
 	setUpLevel();
 	m_projectileManager.init();
-	createGoal();
 	m_pickUpManager.init(m_renderer);
 	m_hudManager.init(t_renderer);
 	m_eventManager.subscribeToEvent<GameOver>(std::bind(&GameScreen::gameOver, this, std::placeholders::_1));
-}
+
+} 

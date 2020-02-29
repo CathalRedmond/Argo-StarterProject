@@ -78,6 +78,11 @@ struct ChangeScreen
 	MenuStates newScreen;
 };
 
+struct GoalHit
+{
+	bool val;
+};
+
 struct GameOver
 {
 

@@ -42,12 +42,15 @@ void PlayerFactory::createPlayer(Entity& t_entity, bool t_isPlayer, Controller& 
 	t_entity.addComponent(new TransformComponent());
 	t_entity.addComponent(new ForceComponent());
 	t_entity.addComponent(new ColliderCircleComponent(Utilities::PLAYER_RADIUS));
-	t_entity.addComponent(new ColourComponent(glm::linearRand(0, 255), glm::linearRand(0, 255), glm::linearRand(0, 255), 255));
+	t_entity.addComponent(new ColourComponent(255, 0, 0, 170));
 	t_entity.addComponent(new PrimitiveComponent());
 	t_entity.addComponent(new TagComponent(Tag::Player));
 	t_entity.addComponent(new FireRateComponent(Utilities::PLAYER_FIRE_DELAY));
 	t_entity.addComponent(new WeaponComponent());
 	t_entity.addComponent(new FSMComponent());
+
+
+
 
 	if (t_isPlayer)
 	{

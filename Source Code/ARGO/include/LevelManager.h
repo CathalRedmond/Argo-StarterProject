@@ -11,6 +11,7 @@
 #include "BaseSystem.h"
 #include "RenderSystem.h"
 #include "ProjectileManager.h"
+#include "LightManager.h"
 #include <queue>
 
 struct LessThanByTotalDistance
@@ -27,7 +28,7 @@ struct LessThanByTotalDistance
 class LevelManager
 {
 public:
-	LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager, EventManager& t_eventManager);
+	LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager, LightManager& t_lightManager, EventManager& t_eventManager);
 	void setupLevel();
 	void update(BaseSystem* t_system);
 	void checkWallDamage();
@@ -57,6 +58,8 @@ private:
 	RenderSystem& m_renderSystem;
 	ProjectileManager& m_projectilemanager;
 	EventManager& m_eventManager;
+	LightManager& m_lightManager;
+	
 
 	const int LIGHT_LOST_PER_TILE = 32;
 	const int LIGHT_LOST_PER_CORNER = 45; //LIGHT_LOST_PER_TILE(32) / tile size(64) * distance to corner tiles (90.5f)

@@ -16,6 +16,7 @@
     <ClCompile Include="src\AnalogRotateCommand.cpp" />
     <ClCompile Include="src\AssetManager.cpp" />
     <ClCompile Include="src\AudioManager.cpp" />
+    <ClCompile Include="src\BloodManager.cpp" />
     <ClCompile Include="src\CloseWindowCommand.cpp" />
     <ClCompile Include="src\Command.cpp" />
     <ClCompile Include="src\EnemyFactory.cpp" />
@@ -32,6 +33,7 @@
     <ClCompile Include="src\HelpScreen.cpp" />
     <ClCompile Include="src\LevelManager.cpp" />
     <ClCompile Include="src\LoadingScreen.cpp" />
+    <ClCompile Include="src\LightManager.cpp" />
     <ClCompile Include="src\MenuCancelCommand.cpp" />
     <ClCompile Include="src\MenuConfirmCommand.cpp" />
     <ClCompile Include="src\HUDComponent.cpp" />
@@ -110,6 +112,7 @@
     <ClInclude Include="include\AssetManager.h" />
     <ClInclude Include="include\AudioManager.h" />
     <ClInclude Include="include\BehaviourTree.h" />
+    <ClInclude Include="include\BloodManager.h" />
     <ClInclude Include="include\CloseWindowCommand.h" />
     <ClInclude Include="include\Command.h" />
     <ClInclude Include="include\EnemyFactory.h" />
@@ -129,6 +132,7 @@
     <ClInclude Include="include\HelpScreen.h" />
     <ClInclude Include="include\LevelManager.h" />
     <ClInclude Include="include\LoadingScreen.h" />
+    <ClInclude Include="include\LightManager.h" />
     <ClInclude Include="include\MenuCancelCommand.h" />
     <ClInclude Include="include\MenuConfirmCommand.h" />
     <ClInclude Include="include\HealthComponent.h" />

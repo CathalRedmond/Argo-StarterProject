@@ -359,9 +359,10 @@ void Game::changeScreen(const ChangeScreen& t_event)
 
 void Game::loadGame(const LoadGame& t_event)
 {
+	createButtonMaps();
 	if (m_hasScreenBeenSet[static_cast<int>(MenuStates::Game)])
 	{
-		m_gameScreen.reset(m_renderer, m_controllers);
+		m_gameScreen.reset(m_renderer, m_controllers, m_controllerButtonMaps);
 	}
 	else
 	{
