@@ -157,6 +157,11 @@ void EnemyManager::killAll()
 	}
 }
 
+void EnemyManager::setDifficulty(int t_value)
+{
+	m_difficultyLevel = t_value;
+}
+
 void EnemyManager::render(SDL_Renderer* t_renderer)
 {
 	for (auto& enemy : m_enemies)

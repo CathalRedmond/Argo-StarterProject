@@ -67,7 +67,7 @@ struct UpdateAchievement
 {
 	int enemiesKilled = 0;
 	int gamesWon = 0;
-}; 
+};
 
 struct CloseWindow
 {
@@ -76,6 +76,11 @@ struct CloseWindow
 struct ChangeScreen
 {
 	MenuStates newScreen;
+};
+
+struct GoalHit
+{
+	bool val;
 };
 
 struct GameOver
@@ -87,6 +92,14 @@ struct UpdatePlayerColour
 {
 	glm::vec3 colour;
 	int playerIndex;
+};
+
+struct LoadGame
+{
+};
+
+struct UpdateLoading
+{
 };
 
 class BaseEvent

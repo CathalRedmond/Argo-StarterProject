@@ -11,6 +11,7 @@
 #include "BaseSystem.h"
 #include "RenderSystem.h"
 #include "ProjectileManager.h"
+#include "LightManager.h"
 #include <queue>
 
 struct LessThanByTotalDistance
@@ -27,7 +28,7 @@ struct LessThanByTotalDistance
 class LevelManager
 {
 public:
-	LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager);
+	LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager, LightManager& t_lightManager, EventManager& t_eventManager);
 	void setupLevel();
 	void update(BaseSystem* t_system);
 	void checkWallDamage();
@@ -45,7 +46,7 @@ private:
 	void generateFlowField();
 	void setNeighbourWeights(Entity* t_entity, std::vector<Entity*>& t_queue);
 	void setTileWeight(Entity* t_entity, Entity* t_closestNeighbour, std::vector<Entity*>& t_queue, int t_newWeight);
-	void generateLightField(); 
+	void generateLightField();
 	void setTileLight(Entity* t_entity, std::vector<Entity*>& t_queue, int t_newWeight);
 	void setNeighbourLights(Entity* t_entity, std::vector<Entity*>& t_queue);
 	void resetPathing();
@@ -56,6 +57,9 @@ private:
 	SDL_Renderer* m_renderer;
 	RenderSystem& m_renderSystem;
 	ProjectileManager& m_projectilemanager;
+	EventManager& m_eventManager;
+	LightManager& m_lightManager;
+	
 
 	const int LIGHT_LOST_PER_TILE = 32;
 	const int LIGHT_LOST_PER_CORNER = 45; //LIGHT_LOST_PER_TILE(32) / tile size(64) * distance to corner tiles (90.5f)

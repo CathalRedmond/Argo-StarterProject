@@ -81,7 +81,7 @@ namespace Utilities
 	const int MAX_FLOW_FIELD_WEIGHT = 20;
 
 	const float RADIANS_TO_DEGREES = 57.2958;
-	static const int S_NUMBER_OF_SCREENS = 7; 
+	static const int S_NUMBER_OF_SCREENS = 8; 
 
 	static const glm::vec3 MENU_BUTTON_HIGHLIGHTED_COLOUR{ 255,255,240 };
 	static const glm::vec3 MENU_BUTTON_DEFAULT_COLOUR{ 199,163,10 };
@@ -92,6 +92,10 @@ namespace Utilities
 	//HUD Values
 	const float PERCENTAGE_BUFFER_BETWEEN_HUDS = 0.05f;//5% screen space.
 	const float PERCENTAGE_SCREENSPACE_OF_HUD = 0.1875f;//18.75% screen space which is taken by each HUD.
+
+	//Light Manager
+	const int LIGHT_MAX_POOL = 20;
+	const int LIGHT_EXPLOSION_LIFETIME = 30;
 
 	//Particles Manager
 	//Base Particles
@@ -134,7 +138,8 @@ enum class MenuStates
 	Help,
 	License,
 	Splash,
-	Achievements
+	Achievements,
+	Loading
 };
 
 enum class Systems

@@ -7,7 +7,8 @@
 #include "HelpScreen.h"
 #include "SplashScreen.h"
 #include "LicenseScreen.h"
-#include "AchievementScreen.h" 
+#include "AchievementScreen.h"
+#include "LoadingScreen.h"
 #include "Event.h"
 
 #include "AiSystem.h"
@@ -42,6 +43,9 @@ private:
 
 	void closeWindow(const CloseWindow& t_event = CloseWindow());
 	void changeScreen(const ChangeScreen& t_event);
+	void loadGame(const LoadGame& t_event);
+	void updateLoading(const UpdateLoading& t_event);
+
  
 	int shownAchv = -1;
 	int timeSincePopup = -1;
@@ -75,6 +79,7 @@ private:
 	LicenseScreen m_licenseScreen;
 	SplashScreen m_splashScreen;
 	AchievementScreen m_achievementsScreen; 
+	LoadingScreen m_loadingScreen;
 
 	Controller m_controllers[Utilities::S_MAX_PLAYERS];
 
