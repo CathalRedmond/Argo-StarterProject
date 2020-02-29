@@ -10,7 +10,7 @@ bool cleanUpEnemies(const Entity& t_entity)
 GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, Controller t_controllers[Utilities::S_MAX_PLAYERS], CommandSystem& t_commandSystem, InputSystem& t_input, RenderSystem& t_renderSystem) :
 	m_eventManager{ t_eventManager },
 	m_controllers{ *t_controllers },
-	m_levelManager{ t_renderer, m_players, m_renderSystem, m_projectileManager },
+	m_levelManager{ t_renderer, m_players, m_renderSystem, m_projectileManager, m_lightManager },
 	m_enemyManager{ t_renderer, Utilities::ENEMY_INITIAL_SPAWN_DELAY, t_eventManager, m_transformSystem, m_collisionSystem, m_healthSystem, m_aiSystem, m_renderSystem, m_levelManager },
 	m_renderer{ t_renderer },
 	m_transformSystem{ m_eventManager },
@@ -25,12 +25,13 @@ GameScreen::GameScreen(SDL_Renderer* t_renderer, EventManager& t_eventManager, C
 	m_renderSystem{ t_renderSystem },
 	m_hudManager(m_players),
 	m_particleManager(m_eventManager, m_particleSystem),
+	m_bloodManager(m_particleSystem, m_players),
+	m_lightManager(m_eventManager),
 	m_currentLevel(0),
 	m_gameOver(false),
 	m_goalCurrentCharge(0),
 	m_goalIsCharging(false),
-	m_goalState(GoalState::Inactive),
-	m_bloodManager(m_particleSystem, m_players)
+	m_goalState(GoalState::Inactive)
 {
 	t_eventManager.subscribeToEvent<GoalHit>(std::bind(&GameScreen::activateGoal, this, std::placeholders::_1));
 
@@ -61,6 +62,7 @@ void GameScreen::update(float t_deltaTime)
 		m_hudManager.update();
 		m_particleManager.update(t_deltaTime);
 		m_bloodManager.update(t_deltaTime);
+		m_lightManager.update(t_deltaTime);
 	}
 }
 

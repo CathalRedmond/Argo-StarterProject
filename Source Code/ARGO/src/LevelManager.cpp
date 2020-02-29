@@ -1,11 +1,12 @@
 #include "stdafx.h"
 #include "LevelManager.h"
 
-LevelManager::LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager):
+LevelManager::LevelManager(SDL_Renderer* t_renderer, Entity(&t_players)[Utilities::S_MAX_PLAYERS], RenderSystem& t_renderSystem, ProjectileManager& t_projectileManager, LightManager& t_lightManager):
 	m_renderer(t_renderer),
 	m_players(t_players),
 	m_renderSystem(t_renderSystem),
-	m_projectilemanager(t_projectileManager)
+	m_projectilemanager(t_projectileManager),
+	m_lightManager(t_lightManager)
 {
 }
 
@@ -196,6 +197,24 @@ void LevelManager::generateLightField()
 	{
 		HealthComponent* healthComp = static_cast<HealthComponent*>(glowStick.getComponent(ComponentType::Health));
 		TransformComponent* transformComp = static_cast<TransformComponent*>(glowStick.getComponent(ComponentType::Transform));
+		if (healthComp && transformComp && healthComp->isAlive())
+		{
+			Entity* tile = findAtPosition(transformComp->getPos());
+			if (tile)
+			{
+				FlowFieldComponent* flowFieldComp = static_cast<FlowFieldComponent*>(tile->getComponent(ComponentType::FlowField));
+				if (flowFieldComp)
+				{
+					setTileLight(tile, queue, 0);
+				}
+			}
+		}
+	}
+
+	for (auto& lightSource : m_lightManager.getLights())
+	{
+		HealthComponent* healthComp = static_cast<HealthComponent*>(lightSource.getComponent(ComponentType::Health));
+		TransformComponent* transformComp = static_cast<TransformComponent*>(lightSource.getComponent(ComponentType::Transform));
 		if (healthComp && transformComp && healthComp->isAlive())
 		{
 			Entity* tile = findAtPosition(transformComp->getPos());
