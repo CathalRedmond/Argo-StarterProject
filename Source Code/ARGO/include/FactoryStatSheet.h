@@ -7,6 +7,7 @@ namespace FactoryStatSheet
 	const int PLAYER_MAX_HP = 10;
 	const int PLAYER_MAX_HP_1 = 15;
 	const int PLAYER_MAX_HP_2 = 20;
+	const int PLAYER_MAX_HP_3 = 25;
 	const int PLAYER_STARTING_HP = 10;
 	const float PLAYER_INVINCIBILITY_FRAMES = 32.0f;
 

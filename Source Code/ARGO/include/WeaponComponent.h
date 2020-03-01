@@ -34,8 +34,8 @@ private:
 	const float GLOWSTICK_COOLDOWN = 120;
 	const float PISTOL_COOLDOWN = 20;
 	const float MACHINEGUN_COOLDOWN = 10;
-	const float GREANADE_LAUNCHER_COOLDOWN = 60;
-	const float SHOTGUN_COOLDOWN = 30;
+	const float GREANADE_LAUNCHER_COOLDOWN = 45;
+	const float SHOTGUN_COOLDOWN = 25;
 
 	const int MACHINEGUN_MAX_AMMO = 60;
 	const int SHOTGUN_MAX_AMMO = 20;
