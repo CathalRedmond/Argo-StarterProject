@@ -137,7 +137,8 @@ void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponen
 		if (t_aiComponent->getSeekPos() == glm::vec2(-1, -1))
 		{
 			glm::vec2 pos = getRandomFloorTile() + glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE) / 2.0f;
-			if (pos != glm::vec2(-1, -1))
+			glm::vec2 badPos = glm::vec2(-1, -1) + glm::vec2(Utilities::TILE_SIZE, Utilities::TILE_SIZE) / 2.0f;
+			if (pos != badPos)
 			{
 				t_aiComponent->setSeekPos(pos);
 			}
