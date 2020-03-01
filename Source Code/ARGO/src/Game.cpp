@@ -118,11 +118,18 @@ void Game::run()
 				processEvent();
 				float deltaTime = (float)timeSinceLastTick / (float)timePerFrame;
 				lastTick = currentTick;
+				std::cout << deltaTime << std::endl;
+				
+				if (deltaTime > 3)
+				{
+					deltaTime = 3;
+				}
+
 				update(deltaTime);
 			}
 		}
-		render();
 		nextFrame = SDL_GetTicks() + timePerFrame;
+		render();
 	}
 }
 

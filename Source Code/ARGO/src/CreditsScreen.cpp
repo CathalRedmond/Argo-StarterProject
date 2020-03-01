@@ -16,7 +16,7 @@ CreditsScreen::~CreditsScreen()
 void CreditsScreen::update(float t_deltaTime)
 {
 	m_inputSystem.update(m_inputEntity);
-	m_commandSystem.update(m_inputEntity, m_eventManager);
+	m_commandSystem.update(m_inputEntity, m_eventManager, t_deltaTime);
 }
 
 void CreditsScreen::render(SDL_Renderer* t_renderer)

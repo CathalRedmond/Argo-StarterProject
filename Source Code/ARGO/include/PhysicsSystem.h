@@ -16,6 +16,7 @@ public:
 	~PhysicsSystem();
 	void update(Entity& t_entity, float t_dt);
 	void update(Entity& t_entity);
+	void handleFriction(float t_dt);
 
 private: 
 
@@ -23,4 +24,6 @@ private:
 	void updateRotation(const PhysicsRotate& t_event);
 	void handleRotation(TransformComponent* t_transformComp);
  	const float FRICTION_SCALAR = 0.9f;
+	float m_frictionTimer;
+	int m_applyFriction;
 };

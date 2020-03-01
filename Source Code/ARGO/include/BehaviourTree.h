@@ -4,19 +4,19 @@
 
 
 ////----------------------------Helper functions.----------------------------
-static void move(ForceComponent* t_forceComp, TransformComponent* t_transformComp, glm::vec2 t_direction)
+static void move(ForceComponent* t_forceComp, TransformComponent* t_transformComp, glm::vec2 t_direction, float t_dt)
 {
-	t_forceComp->addForce(t_direction);
+	t_forceComp->addForce(t_direction * t_dt);
 	t_transformComp->setRotation(glm::degrees(atan2(t_direction.y, t_direction.x)));
 }
-static void path(ForceComponent* t_forceComp, TransformComponent* t_transformComp, glm::vec2 t_destination, LevelManager& t_levelManager)
+static void path(ForceComponent* t_forceComp, TransformComponent* t_transformComp, glm::vec2 t_destination, LevelManager& t_levelManager, float t_dt)
 {
 	std::vector<glm::vec2> path = t_levelManager.createPath(t_transformComp->getPos(), t_destination);
 
 	if (!path.empty())
 	{
 		glm::vec2 direction = glm::normalize(path.back() - t_transformComp->getPos());
-		t_forceComp->addForce(direction);
+		t_forceComp->addForce(direction * t_dt);
 		t_transformComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
 	}
 }
@@ -59,7 +59,7 @@ struct GoalData
 class WeightedNode 
 {
 public:
-	virtual bool run(Entity& t_entity) = 0;
+	virtual bool run(Entity& t_entity, float t_deltaTime) = 0;
 	virtual float getWeight(Entity& t_entity) = 0;
 };
 
@@ -75,7 +75,7 @@ public:
 class WeightedSelector : public WeightedCompositeNode 
 {
 public:
-	virtual bool run(Entity& t_entity) override
+	virtual bool run(Entity& t_entity, float t_deltaTime) override
 	{
 		WeightedNode* bestNode = nullptr;
 		float bestWeight = -1.0f;
@@ -90,7 +90,7 @@ public:
 		}
 		if (bestNode)
 		{
-			bestNode->run(t_entity);
+			bestNode->run(t_entity, t_deltaTime);
 			return true;
 		}
 		return false;
@@ -108,7 +108,7 @@ private:
 	LevelManager& m_levelManager;
 public:
 	RetreatBehaviour(EnemyData* t_data, LevelManager& t_levelManager) : m_data(t_data), m_levelManager(t_levelManager) {}
-	virtual bool run(Entity& t_entity) override
+	virtual bool run(Entity& t_entity, float t_deltaTime) override
 	{
 		TransformComponent* transformComp = static_cast<TransformComponent*>(t_entity.getComponent(ComponentType::Transform));
 		ForceComponent* forceComp = static_cast<ForceComponent*>(t_entity.getComponent(ComponentType::Force));
@@ -117,7 +117,7 @@ public:
 		if (forceComp)
 		{
 			static_cast<FSMComponent*>(t_entity.getComponent(ComponentType::FSM))->getFSM().setMoved(true);
-			move(forceComp, transformComp, glm::normalize(transformComp->getPos() - enemyPos));
+			move(forceComp, transformComp, glm::normalize(transformComp->getPos() - enemyPos), t_deltaTime);
 			return true;
 		}
 		return false;
@@ -135,7 +135,7 @@ private:
 	LevelManager& m_levelManager;
 public:
 	HoldBehaviour(EnemyData* t_data, LevelManager& t_levelManager) : m_data(t_data), m_levelManager(t_levelManager) {}
-	virtual bool run(Entity& t_entity) override
+	virtual bool run(Entity& t_entity, float t_deltaTime) override
 	{
 		return true;
 	}
@@ -151,7 +151,7 @@ private:
 	LevelManager& m_levelManager;
 public:
 	GetAmmoBehaviour(ClosestPickupData* t_data, LevelManager& t_levelManager) : m_data(t_data), m_levelManager(t_levelManager) {}
-	virtual bool run(Entity& t_entity) override
+	virtual bool run(Entity& t_entity, float t_deltaTime) override
 	{
 		TransformComponent* transformComp = static_cast<TransformComponent*>(t_entity.getComponent(ComponentType::Transform));
 		ForceComponent* forceComp = static_cast<ForceComponent*>(t_entity.getComponent(ComponentType::Force));
@@ -159,7 +159,7 @@ public:
 		if (forceComp && transComp->getPos() != transformComp->getPos())
 		{
 			static_cast<FSMComponent*>(t_entity.getComponent(ComponentType::FSM))->getFSM().setMoved(true);
-			path(forceComp, transformComp, transComp->getPos(), m_levelManager);
+			path(forceComp, transformComp, transComp->getPos(), m_levelManager, t_deltaTime);
 			return true;
 		}
 		return false;
@@ -185,7 +185,7 @@ private:
 	LevelManager& m_levelManager;
 public:
 	GetHealthBehaviour(ClosestHealthData* t_data, LevelManager& t_levelManager) : m_data(t_data), m_levelManager(t_levelManager) {}
-	virtual bool run(Entity& t_entity) override
+	virtual bool run(Entity& t_entity, float t_deltaTime) override
 	{
 		TransformComponent* transformComp = static_cast<TransformComponent*>(t_entity.getComponent(ComponentType::Transform));
 		ForceComponent* forceComp = static_cast<ForceComponent*>(t_entity.getComponent(ComponentType::Force));
@@ -193,7 +193,7 @@ public:
 		if (forceComp && transComp->getPos() != transformComp->getPos())
 		{
 			static_cast<FSMComponent*>(t_entity.getComponent(ComponentType::FSM))->getFSM().setMoved(true);
-			path(forceComp, transformComp, transComp->getPos(), m_levelManager);
+			path(forceComp, transformComp, transComp->getPos(), m_levelManager, t_deltaTime);
 			return true;
 		}
 		return false;
@@ -218,14 +218,14 @@ private:
 	LevelManager& m_levelManager;
 public:
 	MoveToGoalBehaviour(GoalData* t_data, LevelManager& t_levelManager) : m_data(t_data), m_levelManager(t_levelManager) {}
-	virtual bool run(Entity& t_entity) override
+	virtual bool run(Entity& t_entity, float t_deltaTime) override
 	{
 		TransformComponent* transformComp = static_cast<TransformComponent*>(t_entity.getComponent(ComponentType::Transform));
 		ForceComponent* forceComp = static_cast<ForceComponent*>(t_entity.getComponent(ComponentType::Force));
 		if (forceComp && m_data->destination != transformComp->getPos())
 		{
 			static_cast<FSMComponent*>(t_entity.getComponent(ComponentType::FSM))->getFSM().setMoved(true);
-			path(forceComp, transformComp, m_data->destination, m_levelManager);
+			path(forceComp, transformComp, m_data->destination, m_levelManager, t_deltaTime);
 			return true;
 		}
 		return false;
@@ -249,7 +249,7 @@ private:
 	LevelManager& m_levelManager;
 public:
 	MoveToLeaderBehaviour(ClosestLeaderData* t_data, LevelManager& t_levelManager) : m_data(t_data), m_levelManager(t_levelManager) {}
-	virtual bool run(Entity& t_entity) override
+	virtual bool run(Entity& t_entity, float t_deltaTime) override
 	{
 		TransformComponent* transformComp = static_cast<TransformComponent*>(t_entity.getComponent(ComponentType::Transform));
 		ForceComponent* forceComp = static_cast<ForceComponent*>(t_entity.getComponent(ComponentType::Force));
@@ -257,7 +257,7 @@ public:
 		if (forceComp && goalTransComp->getPos() != transformComp->getPos())
 		{
 			static_cast<FSMComponent*>(t_entity.getComponent(ComponentType::FSM))->getFSM().setMoved(true);
-			path(forceComp, transformComp, goalTransComp->getPos(), m_levelManager);
+			path(forceComp, transformComp, goalTransComp->getPos(), m_levelManager, t_deltaTime);
 			return true;
 		}
 		return false;

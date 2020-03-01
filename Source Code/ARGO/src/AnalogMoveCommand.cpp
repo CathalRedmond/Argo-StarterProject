@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "AnalogMoveCommand.h"
 
-void AnalogMoveCommand::execute(Entity& t_entity, EventManager& t_eventManager)
+void AnalogMoveCommand::execute(Entity& t_entity, EventManager& t_eventManager, float t_dt)
 {
 	InputComponent* inputComp = static_cast<InputComponent*>(t_entity.getComponent(ComponentType::Input));
 	if (inputComp)
@@ -11,6 +11,6 @@ void AnalogMoveCommand::execute(Entity& t_entity, EventManager& t_eventManager)
 		{
 			fsm->getFSM().setMoved(true);
 		}
-		t_eventManager.emitEvent(PhysicsMove{ glm::normalize(inputComp->getController().getCurrent().LeftThumbStick), t_entity });
+		t_eventManager.emitEvent(PhysicsMove{ glm::normalize(inputComp->getController().getCurrent().LeftThumbStick) * t_dt, t_entity });
 	}
 }

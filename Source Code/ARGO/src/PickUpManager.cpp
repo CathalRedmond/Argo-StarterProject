@@ -45,8 +45,8 @@ void PickUpManager::removePickup(const PickupGrabbed& t_event)
 		transformComp->setPos(-1000, -1000);
 
 		healthComp->setHealth(0);
-		nextAvailablePickup();
 	}
+	nextAvailablePickup();
 }
 
 ///<summary>
@@ -64,8 +64,8 @@ void PickUpManager::placePickup(glm::vec2 t_pos, int t_pickUpType)
 		HealthComponent* healthComp = static_cast<HealthComponent*>(m_pickUps[m_currentPickup].getComponent(ComponentType::Health));
 		healthComp->setHealth(1);
 		delete factory;
-		nextAvailablePickup();
 	}
+	nextAvailablePickup();
 }
 
 ///<summary>
@@ -136,6 +136,7 @@ void PickUpManager::reset()
 	{
 		static_cast<HealthComponent*>(pickUp.getComponent(ComponentType::Health))->setHealth(0);
 	}
+	nextAvailablePickup();
 }
 ///<summary>
 /// If a Pickup is alive then it renders it.

@@ -1,7 +1,9 @@
 #include "stdafx.h"
 #include "PhysicsSystem.h"
 
-PhysicsSystem::PhysicsSystem(EventManager& t_eventManager)
+PhysicsSystem::PhysicsSystem(EventManager& t_eventManager) :
+	m_frictionTimer(0),
+	m_applyFriction(0)
 {
 	t_eventManager.subscribeToEvent<PhysicsMove>(std::bind(&PhysicsSystem::updateWithInput, this, std::placeholders::_1));
 	t_eventManager.subscribeToEvent<PhysicsRotate>(std::bind(&PhysicsSystem::updateRotation, this, std::placeholders::_1));
@@ -23,10 +25,10 @@ void PhysicsSystem::update(Entity& t_entity, float t_dt)
 			transformComp->addPos(forceComp->getForce() * t_dt);
 			if (forceComp->getHasFriction())
 			{
-				glm::vec2 friction = forceComp->getForce() * FRICTION_SCALAR;
-				glm::vec2 dif = forceComp->getForce() - friction;
-				//this might have to be multiplied by t_dt
-				forceComp->setForce(forceComp->getForce() - dif);
+				for (int i = 0; i < m_applyFriction; i++)
+				{
+					forceComp->setForce(forceComp->getForce() * FRICTION_SCALAR);
+				}
 			}
 		}
 		handleRotation(transformComp);
@@ -37,13 +39,23 @@ void PhysicsSystem::update(Entity& t_entity)
 {
 }
 
+void PhysicsSystem::handleFriction(float t_dt)
+{
+	m_applyFriction = 0;
+	m_frictionTimer += t_dt;
+	while (m_frictionTimer > 1)
+	{
+		m_frictionTimer--;
+		m_applyFriction++;
+	}
+}
+
 void PhysicsSystem::updateWithInput(const PhysicsMove& t_event)
 {
-	glm::vec2 normalisedVelocity = glm::normalize(t_event.velocity);
 	ForceComponent* forceComp = static_cast<ForceComponent*>(t_event.entity.getComponent(ComponentType::Force));
 	if (forceComp)
 	{
-		forceComp->addForce(normalisedVelocity);
+		forceComp->addForce(t_event.velocity);
 	}
 	TransformComponent* transformComp = static_cast<TransformComponent*>(t_event.entity.getComponent(ComponentType::Transform));
 	if (transformComp)

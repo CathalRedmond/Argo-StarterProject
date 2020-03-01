@@ -9,7 +9,7 @@ class CommandSystem :
 public:
 	CommandSystem();
 	~CommandSystem();
-	void update(Entity& t_entity, EventManager& t_eventManager);
+	void update(Entity& t_entity, EventManager& t_eventManager, float t_dt);
 	void update(Entity& t_entity) {}
 };
 

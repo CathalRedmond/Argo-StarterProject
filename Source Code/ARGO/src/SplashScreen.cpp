@@ -16,7 +16,7 @@ SplashScreen::~SplashScreen()
 void SplashScreen::update(float t_deltaTime)
 {
 	m_inputSystem.update(m_inputEntity);
-	m_commandSystem.update(m_inputEntity, m_eventManager);
+	m_commandSystem.update(m_inputEntity, m_eventManager, t_deltaTime);
 	if (SDL_GetTicks() - m_screenStartTime > S_TIME_ON_SCREEN)
 	{
 		m_eventManager.emitEvent(ChangeScreen{ MenuStates::License });

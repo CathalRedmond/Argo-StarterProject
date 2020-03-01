@@ -4,6 +4,6 @@
 class ThrowGlowstickCommand :
 	public Command
 {
-	virtual void execute(Entity& t_entity, EventManager& t_eventManager);
+	virtual void execute(Entity& t_entity, EventManager& t_eventManager, float t_dt);
 };
 

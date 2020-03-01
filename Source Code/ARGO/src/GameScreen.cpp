@@ -52,6 +52,7 @@ void GameScreen::update(float t_deltaTime)
 	updatePlayers(t_deltaTime);
 	if (!m_gameOver)
 	{
+		m_transformSystem.handleFriction(t_deltaTime);
 		updateGoal(t_deltaTime);
 		updateLevelManager();
 		updateEntities(t_deltaTime);
@@ -347,11 +348,11 @@ void GameScreen::updatePlayers(float t_deltaTime)
 	for (Entity& player : m_players)
 	{
 		m_inputSystem.update(player);
-		m_commandSystem.update(player, m_eventManager);
+		m_commandSystem.update(player, m_eventManager, t_deltaTime);
 		if (static_cast<HealthComponent*>(player.getComponent(ComponentType::Health))->isAlive())
 		{
 			static_cast<FSMComponent*>(player.getComponent(ComponentType::FSM))->getFSM().setMoved(false);
-			m_aiSystem.update(player);
+			m_aiSystem.update(player, t_deltaTime);
 			m_healthSystem.update(player, t_deltaTime);
 			m_transformSystem.update(player, t_deltaTime);
 			m_collisionSystem.update(player);

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "FireBulletCommand.h"
 
-void FireBulletCommand::execute(Entity& t_entity, EventManager& t_eventManager)
+void FireBulletCommand::execute(Entity& t_entity, EventManager& t_eventManager, float t_dt)
 {
 	TransformComponent* transformComponent = static_cast<TransformComponent*>(t_entity.getComponent(ComponentType::Transform));
 	InputComponent* inputComp = static_cast<InputComponent*>(t_entity.getComponent(ComponentType::Input));

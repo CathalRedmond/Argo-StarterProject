@@ -20,9 +20,9 @@ void CommandComponent::popTopCommand()
 	m_commands.popTopCommand();
 }
 
-void CommandComponent::executeTopCommand(Entity& t_entity, EventManager& t_eventManager)
+void CommandComponent::executeTopCommand(Entity& t_entity, EventManager& t_eventManager, float t_dt)
 {
-	m_commands.executeTop(t_entity, t_eventManager);
+	m_commands.executeTop(t_entity, t_eventManager, t_dt);
 }
 
 std::stack<Command*> CommandComponent::getCommands()

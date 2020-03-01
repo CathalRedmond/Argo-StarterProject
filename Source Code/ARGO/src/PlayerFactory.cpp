@@ -25,6 +25,7 @@ void PlayerFactory::createPlayer(Entity& t_entity, bool t_isPlayer, Controller& 
 {
 	t_entity.addComponent(new CommandComponent());
 	int playerHp = FactoryStatSheet::PLAYER_MAX_HP;
+	int playerStartingHp = FactoryStatSheet::PLAYER_STARTING_HP;
 	if (Utilities::Achievements::numberOfUnlockedAchv == 1)
 	{
 		playerHp = FactoryStatSheet::PLAYER_MAX_HP_1;
@@ -35,10 +36,11 @@ void PlayerFactory::createPlayer(Entity& t_entity, bool t_isPlayer, Controller& 
 	}
 	else if (Utilities::Achievements::numberOfUnlockedAchv == 3)
 	{
-		playerHp = FactoryStatSheet::PLAYER_MAX_HP_3;
+		playerHp = FactoryStatSheet::PLAYER_MAX_HP_2;
+		playerStartingHp = FactoryStatSheet::PLAYER_MAX_HP_2;
 	}
 	const int PLAYER_MAX_HP = playerHp;
-	t_entity.addComponent(new HealthComponent(PLAYER_MAX_HP, PLAYER_MAX_HP, FactoryStatSheet::PLAYER_INVINCIBILITY_FRAMES));
+	t_entity.addComponent(new HealthComponent(PLAYER_MAX_HP, FactoryStatSheet::PLAYER_STARTING_HP, FactoryStatSheet::PLAYER_INVINCIBILITY_FRAMES));
 	t_entity.addComponent(new TransformComponent());
 	t_entity.addComponent(new ForceComponent());
 	t_entity.addComponent(new ColliderCircleComponent(Utilities::PLAYER_RADIUS));

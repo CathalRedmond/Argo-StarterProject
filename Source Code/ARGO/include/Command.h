@@ -5,7 +5,7 @@
 class Command
 {
 public:
-	virtual void execute(Entity& t_entity, EventManager& t_eventManager) = 0;
+	virtual void execute(Entity& t_entity, EventManager& t_eventManager, float t_dt) = 0;
 protected:
 	Command() {};
 };

@@ -27,9 +27,9 @@ class MacroCommand
 public:
 	MacroCommand();
 	void add(Command* t_command);
-	void addAndExecute(Command* t_command, Entity& t_entity, EventManager& t_eventManager);
-	void executeTop(Entity& t_entity, EventManager& t_eventManager);
-	void executeTopAndPop(Entity& t_entity, EventManager& t_eventManager);
+	void addAndExecute(Command* t_command, Entity& t_entity, EventManager& t_eventManager, float t_dt);
+	void executeTop(Entity& t_entity, EventManager& t_eventManager, float t_dt);
+	void executeTopAndPop(Entity& t_entity, EventManager& t_eventManager, float t_dt);
 	void popTopCommand();
 	std::stack<Command*> getCommands();
 private:

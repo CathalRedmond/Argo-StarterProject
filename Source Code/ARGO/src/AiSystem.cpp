@@ -30,6 +30,10 @@ AiSystem::~AiSystem()
 
 void AiSystem::update(Entity& t_entity)
 {
+}
+
+void AiSystem::update(Entity& t_entity, float t_dt)
+{
 	TransformComponent* posComp = static_cast<TransformComponent*>(t_entity.getComponent(ComponentType::Transform));
 	AiComponent* aiComp = static_cast<AiComponent*>(t_entity.getComponent(ComponentType::Ai));
 	ForceComponent* forceComp = static_cast<ForceComponent*>(t_entity.getComponent(ComponentType::Force));
@@ -41,18 +45,18 @@ void AiSystem::update(Entity& t_entity)
 		switch (aiComp->getType())
 		{
 		case AITypes::eMelee:
-			meleeAI(posComp, aiComp, forceComp);
+			meleeAI(posComp, aiComp, forceComp, t_dt);
 			break;
 		case AITypes::eRanged:
-			rangedAI(posComp, aiComp, forceComp);
+			rangedAI(posComp, aiComp, forceComp, t_dt);
 			break;
 		case AITypes::ePlayerBot:
-			playerAI(t_entity);
+			playerAI(t_entity, t_dt);
 			break;
 		case AITypes::eWaller:
 		{
 			HealthComponent* healthComp = static_cast<HealthComponent*>(t_entity.getComponent(ComponentType::Health));
-			wallerAi(posComp, aiComp, forceComp, healthComp);
+			wallerAi(posComp, aiComp, forceComp, healthComp, t_dt);
 			break;
 		}
 		default:
@@ -61,7 +65,7 @@ void AiSystem::update(Entity& t_entity)
 	}
 }
 
-void AiSystem::meleeAI(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
+void AiSystem::meleeAI(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, float t_dt)
 {
 	t_aiComponent->setState(AIStates::eWander);
 	Entity* tile = m_levelManager.findAtPosition(t_posComp->getPos());
@@ -103,32 +107,32 @@ void AiSystem::meleeAI(TransformComponent* t_posComp, AiComponent* t_aiComponent
 	switch (t_aiComponent->getStates())
 	{
 	case AIStates::eSleeping:
-		sleep(t_posComp, t_aiComponent, t_forceComponent);
+		sleep(t_posComp, t_aiComponent, t_forceComponent, t_dt);
 		break;
 	case AIStates::eWander:
-		wander(t_posComp, t_aiComponent, t_forceComponent);
+		wander(t_posComp, t_aiComponent, t_forceComponent, t_dt);
 		break;
 	case AIStates::eSeek:
-		seek(t_posComp, t_aiComponent, t_forceComponent, seekPosition);
+		seek(t_posComp, t_aiComponent, t_forceComponent, seekPosition, t_dt);
 		break;
 	}
 }
 
-void AiSystem::rangedAI(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
+void AiSystem::rangedAI(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, float t_dt)
 {
 	//The Only Possible States Available to Ranged Enemies. Use to limit Behaviours
 	switch (t_aiComponent->getStates())
 	{
 	case AIStates::eSleeping:
-		sleep(t_posComp, t_aiComponent, t_forceComponent);
+		sleep(t_posComp, t_aiComponent, t_forceComponent, t_dt);
 		break;
 	case AIStates::eWander:
-		wander(t_posComp, t_aiComponent, t_forceComponent);
+		wander(t_posComp, t_aiComponent, t_forceComponent, t_dt);
 		break;
 	}
 }
 
-void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, HealthComponent* t_healthComponent)
+void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, HealthComponent* t_healthComponent, float t_dt)
 {
 	switch (t_aiComponent->getStates())
 	{
@@ -147,7 +151,7 @@ void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponen
 				t_healthComponent->setHealth(0);
 			}
 		}
-		wallerSeek(t_posComp, t_aiComponent, t_forceComponent, t_aiComponent->getSeekPos(), t_healthComponent);
+		wallerSeek(t_posComp, t_aiComponent, t_forceComponent, t_aiComponent->getSeekPos(), t_healthComponent, t_dt);
 		break;
 	}
 	default:
@@ -155,14 +159,14 @@ void AiSystem::wallerAi(TransformComponent* t_posComp, AiComponent* t_aiComponen
 	}
 }
 
-void AiSystem::seek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination)
+void AiSystem::seek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination, float t_dt)
 {
 	glm::vec2 direction = glm::normalize(t_destination - t_posComp->getPos());
-	t_forceComponent->addForce(direction);
+	t_forceComponent->addForce(direction * t_dt);
 	t_posComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
 }
 
-void AiSystem::wallerSeek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination, HealthComponent* t_healthComponent)
+void AiSystem::wallerSeek(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, glm::vec2 t_destination, HealthComponent* t_healthComponent, float t_dt)
 {
 	if (glm::distance2(t_destination + glm::vec2(Utilities::TILE_SIZE / 2.0f, Utilities::TILE_SIZE / 2.0f), t_posComp->getPos()) < std::pow(Utilities::TILE_SIZE, 2))
 	{
@@ -177,18 +181,18 @@ void AiSystem::wallerSeek(TransformComponent* t_posComp, AiComponent* t_aiCompon
 	else
 	{
 		glm::vec2 direction = glm::normalize(t_destination - t_posComp->getPos());
-		t_forceComponent->addForce(direction);
+		t_forceComponent->addForce(direction * t_dt);
 		t_posComp->setRotation(glm::degrees(atan2(direction.y, direction.x)));
 	}
 }
 
-void AiSystem::playerAI(Entity& t_entity)
+void AiSystem::playerAI(Entity& t_entity, float t_dt)
 {
-	playerMovementDecision(t_entity);
+	playerMovementDecision(t_entity, t_dt);
 	playerShootingDecision(t_entity);
 }
 
-void AiSystem::playerMovementDecision(Entity& t_entity)
+void AiSystem::playerMovementDecision(Entity& t_entity, float t_dt)
 {
 	//set up data
 	glm::vec2 botPos = static_cast<TransformComponent*>(t_entity.getComponent(ComponentType::Transform))->getPos();
@@ -202,7 +206,7 @@ void AiSystem::playerMovementDecision(Entity& t_entity)
 	setClosestPickupData(botPos);
 	setGoalData(botPos);
 	//query behaviour tree
-	m_behaviourTree.run(t_entity);
+	m_behaviourTree.run(t_entity, t_dt);
 }
 
 void AiSystem::playerShootingDecision(Entity& t_entity)
@@ -369,7 +373,7 @@ void AiSystem::setCurrentWaypoint()
 	}
 }
 
-void AiSystem::wander(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
+void AiSystem::wander(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, float t_dt)
 {
 	//Gives a number between 1 and 20, -10 change the range to -9 and 10 then divides it by 10 to give a range of -.9 and 1.
 	float tempAdjuster = (((rand() % 20 + 1)));
@@ -382,11 +386,11 @@ void AiSystem::wander(TransformComponent* t_posComp, AiComponent* t_aiComponent,
 	//Scales the Unit Vector by the length of the max speed.
 	tempVelocity *= glm::length(t_aiComponent->getMaxSpeed());
 	//Updates Position
-	t_forceComponent->addForce(tempVelocity);
+	t_forceComponent->addForce(tempVelocity * t_dt);
 	//t_posComp->setPos(t_posComp->getPos() + tempVelocity);
 }
 
-void AiSystem::sleep(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent)
+void AiSystem::sleep(TransformComponent* t_posComp, AiComponent* t_aiComponent, ForceComponent* t_forceComponent, float t_dt)
 {
 	//Nothing will add code to awake unit if a target (i.e player) comes within range once discussions are had.
 }

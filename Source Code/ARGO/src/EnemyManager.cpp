@@ -53,7 +53,7 @@ void EnemyManager::update(float t_dt)
 			m_healthSystem.update(enemy, t_dt);
 			m_physicsSystem.update(enemy, t_dt);
 			m_collisionSystem.update(enemy);
-			m_aiSytem.update(enemy);
+			m_aiSytem.update(enemy, t_dt);
 		}
 	}
 	for (auto& waller : m_wallers)
@@ -64,7 +64,7 @@ void EnemyManager::update(float t_dt)
 			m_healthSystem.update(waller, t_dt);
 			m_physicsSystem.update(waller, t_dt);
 			m_collisionSystem.update(waller);
-			m_aiSytem.update(waller);
+			m_aiSytem.update(waller, t_dt);
 		}
 	}
 }
