@@ -118,7 +118,6 @@ void Game::run()
 				processEvent();
 				float deltaTime = (float)timeSinceLastTick / (float)timePerFrame;
 				lastTick = currentTick;
-				std::cout << deltaTime << std::endl;
 				
 				if (deltaTime > 3)
 				{
@@ -325,10 +324,6 @@ void Game::createButtonMaps()
 		m_controllerButtonMaps[static_cast<int>(ButtonState::Pressed)][index].clear();
 		m_controllerButtonMaps[static_cast<int>(ButtonState::Pressed)][index] =
 		{
-			ButtonCommandPair(ButtonType::DpadUp, new MoveUpCommand()),
-			ButtonCommandPair(ButtonType::DpadDown, new MoveDownCommand()),
-			ButtonCommandPair(ButtonType::DpadLeft, new MoveLeftCommand()),
-			ButtonCommandPair(ButtonType::DpadRight, new MoveRightCommand()),
 			ButtonCommandPair(ButtonType::Back, new GoToMainMenuCommand()),
 			ButtonCommandPair(ButtonType::RightTrigger, new FireBulletCommand()),
 			ButtonCommandPair(ButtonType::LeftTrigger, new ThrowGlowstickCommand()),
@@ -338,10 +333,6 @@ void Game::createButtonMaps()
 		// Set Held To Same as Pressed Commands For Time Being
 		m_controllerButtonMaps[static_cast<int>(ButtonState::Held)][index] =
 		{
-			ButtonCommandPair(ButtonType::DpadUp, new MoveUpCommand()),
-			ButtonCommandPair(ButtonType::DpadDown, new MoveDownCommand()),
-			ButtonCommandPair(ButtonType::DpadLeft, new MoveLeftCommand()),
-			ButtonCommandPair(ButtonType::DpadRight, new MoveRightCommand()),
 			ButtonCommandPair(ButtonType::Back, new GoToMainMenuCommand()),
 			ButtonCommandPair(ButtonType::RightTrigger, new FireBulletCommand())
 		};
