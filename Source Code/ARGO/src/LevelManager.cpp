@@ -201,6 +201,25 @@ void LevelManager::generateFlowField()
 		}
 	}
 
+	for (auto& glowStick : m_projectilemanager.getGlowsticks())
+	{
+		HealthComponent* healthComp = static_cast<HealthComponent*>(glowStick.getComponent(ComponentType::Health));
+		TransformComponent* transformComp = static_cast<TransformComponent*>(glowStick.getComponent(ComponentType::Transform));
+		if (healthComp && transformComp && healthComp->isAlive())
+		{
+			Entity* tile = findAtPosition(transformComp->getPos());
+			if (tile)
+			{
+				FlowFieldComponent* flowFieldComp = static_cast<FlowFieldComponent*>(tile->getComponent(ComponentType::FlowField));
+				if (flowFieldComp)
+				{
+					setTileWeight(tile, nullptr, queue, 5);
+				}
+			}
+		}
+	}
+
+
 	while (!queue.empty())
 	{
 		Entity* current = queue.back();

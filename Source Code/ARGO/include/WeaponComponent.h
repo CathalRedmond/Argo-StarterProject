@@ -31,7 +31,12 @@ private:
 	static const int S_NUMBER_OF_WEAPONS = 4;
 	int m_ammo[S_NUMBER_OF_WEAPONS];
 
-	const float GLOWSTICK_COOLDOWN = 120;
+#ifdef _DEBUG
+	const float GLOWSTICK_COOLDOWN = 60;
+#else
+	const float GLOWSTICK_COOLDOWN = 600;
+#endif // _DEBUG
+
 	const float PISTOL_COOLDOWN = 20;
 	const float MACHINEGUN_COOLDOWN = 10;
 	const float GREANADE_LAUNCHER_COOLDOWN = 45;
