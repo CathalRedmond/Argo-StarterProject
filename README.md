@@ -18,3 +18,5 @@ The game was showed off at [Games Fleadh](http://gamesfleadh.ie/) and won 2 awar
   * This award was for both the AI on enemies which was done using Brushfire algorith but also for the AI Players that assisted the real players when not playing as a group of 4
 * **Best Game Built Using Software Libraries**
   * This was the overall prize that was awarded to the best game that was developed from the ground up. We were using C++ and [SDL 2.0](https://www.libsdl.org/)
+
+![Game Clip](https://github.com/CathalRedmond/SwarmGame/blob/master/shortgif.gif)
