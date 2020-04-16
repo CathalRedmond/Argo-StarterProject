@@ -12,6 +12,18 @@ The game was programmed by a team of 4 from IT Carlow.\
 Most art assets were supplied by a team of 4 from the IT Carlow Wexford Campus\
 The game was developed in 4 weeks as part of a joint modules project in final year of Computer Games Development.
 
+Emmett Byrne\
+Project Lead, AI, Algorithms, FSM and optimisation
+
+Przemek Tomczyk\
+Technical Architect, ECS, Asset and Audio managers and memory management
+
+Cathal Redmond\
+Command Pattern, Screens and other
+
+Sean Nash\
+Particles, AI, Weapons, HUD and other
+
 # Games Fleadh
 The game was showed off at [Games Fleadh](http://gamesfleadh.ie/) and won 2 awards
 * **Best in Use of AI Algorithms**
